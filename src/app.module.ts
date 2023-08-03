@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import envConfig from './config/envConfig';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigService, ConfigModule } from '@nestjs/config';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
           dbName: configService.get('DB_NAME', 'admin'), //数据库名
         }
       }
-    })
+    }),
+    OrderModule
   ],
   controllers: [AppController],
   providers: [AppService],
