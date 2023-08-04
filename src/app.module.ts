@@ -13,9 +13,6 @@ import { OrderModule } from './order/order.module';
       // envFilePath: [envConfig.path],
       envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
     }),
-    //  MongooseModule.forRoot(
-    //   "mongodb://admin:admin@45.63.7.173:27017/admin"
-    // ),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
