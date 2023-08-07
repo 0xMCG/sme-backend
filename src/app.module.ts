@@ -8,13 +8,11 @@ import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ 
+    ConfigModule.forRoot({
       isGlobal: true,  // 设置为全局
-      envFilePath: [envConfig.path] 
-     }),
-    //  MongooseModule.forRoot(
-    //   "mongodb://admin:admin@45.63.7.173:27017/admin"
-    // ),
+      // envFilePath: [envConfig.path],
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
+    }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
