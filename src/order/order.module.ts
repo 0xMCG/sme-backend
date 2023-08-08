@@ -3,10 +3,11 @@ import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OrderSchema } from './schema/order.schema';
+import { SeaportProvider } from 'src/provider/seaport.provider';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: 'Order', schema: OrderSchema }])],
   controllers: [OrderController],
-  providers: [OrderService]
+  providers: [OrderService,SeaportProvider]
 })
 export class OrderModule {}
