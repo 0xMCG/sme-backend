@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpCode, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { OrderComponents } from '@opensea/seaport-js/lib/types';
@@ -14,6 +14,9 @@ export class OrderService {
 
     // console.log('hash::', hash);
     // createOrderDto.hash = hash;
+    // hash check
+    const ifExist = await this.orderModel.find({ 'hash': createOrderDto.hash }).limit(1).exec();
+    if (ifExist) throw new HttpException("Order already exist", HttpStatus.BAD_REQUEST);
     let model = new this.orderModel(createOrderDto);
     return await model.save();
   }
