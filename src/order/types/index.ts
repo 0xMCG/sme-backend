@@ -42,13 +42,13 @@ class OrderParameter {
     @ApiProperty()
     orderType: number;
     @ApiProperty({
-        type: [Offer]
+        type: Array<Offer>
     })
-    offer: [Offer];
+    offer: Array<Offer>;
     @ApiProperty({
-        type: [Consideration]
+        type: Array<Consideration>
     })
-    consideration: [Consideration];
+    consideration: Array<Consideration>;
     @ApiProperty()
     totalOriginalConsiderationItems: number;
     @ApiProperty()

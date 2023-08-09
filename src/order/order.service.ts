@@ -10,9 +10,14 @@ export class OrderService {
 
   async create(createOrderDto: CreateOrderDto) {
     // const hash = this.seaportProvider.getProvider().getOrderHash(createOrderDto.entry.parameters as OrderComponents);
-
-    // console.log('hash::', hash);
     // createOrderDto.hash = hash;
+    
+    // orderer & consideration check
+    if (createOrderDto.entry.parameters.offer.length == 0 
+      && createOrderDto.entry.parameters.consideration.length == 0) {
+        throw new HttpException("offer and consideration cannot be empty at the same time", HttpStatus.BAD_REQUEST);
+    }
+     
     // hash check
     const ifExist = await this.orderModel.find({ 'hash': createOrderDto.hash }).limit(1).exec();
     if (ifExist.length != 0) throw new HttpException("Order already exist", HttpStatus.BAD_REQUEST);

@@ -10,7 +10,7 @@ export class ReservoirApi {
         const sdk = require('api')('@reservoirprotocol/v3.0#2n2re32lkmyg6l7');
         sdk.auth(apiKey);
         const response = await sdk.getCollectionsTopsellingV1({accept: '*/*'});
-        return response.data;
+        return response?.data?.collections;
     }
 
     async getCollectionsV6() {
@@ -18,6 +18,6 @@ export class ReservoirApi {
         const sdk = require('api')('@reservoirprotocol/v3.0#2n2re32lkmyg6l7');
         sdk.auth(apiKey);
         const response = await sdk.getCollectionsV6({accept: '*/*'});
-        return response.data;
+        return response?.data?.collections;
     }
 }

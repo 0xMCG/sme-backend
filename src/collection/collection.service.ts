@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { CreateCollectionDto } from './dto/create-collection.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
 import { ReservoirApi } from 'src/lib/reservoir.api';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class CollectionService {
 
-  constructor(private readonly reservoirApi: ReservoirApi){}
+  constructor(private readonly reservoirApi: ReservoirApi, @InjectModel('HotTop') private readonly hotTopSchema){}
 
   create(createCollectionDto: CreateCollectionDto) {
     return 'This action adds a new collection';
@@ -17,7 +18,9 @@ export class CollectionService {
   }
 
   hotTop() {
-    return this.reservoirApi.getCollectionsV6();
+    const data = this.reservoirApi.getCollectionsV6();
+    // this.hotTopSchema.saveMany(data)
+    return data;
   }
 
   findAll() {
