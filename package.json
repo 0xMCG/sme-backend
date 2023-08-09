@@ -28,6 +28,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.1.6",
     "@opensea/seaport-js": "2.0.4",
+    "api": "^6.1.0",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "ethers": "^5.7.2",
