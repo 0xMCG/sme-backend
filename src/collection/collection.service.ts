@@ -16,6 +16,10 @@ export class CollectionService {
     return this.reservoirApi.getCollectionsTopsellingV1();
   }
 
+  hotTop() {
+    return this.reservoirApi.getCollectionsV6();
+  }
+
   findAll() {
     return `This action returns all collection`;
   }

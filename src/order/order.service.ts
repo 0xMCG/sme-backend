@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { OrderComponents } from '@opensea/seaport-js/lib/types';
-import { SeaportProvider } from 'src/provider/seaport.provider';
+import { SeaportProvider } from 'src/lib/seaport.provider';
 
 @Injectable()
 export class OrderService {

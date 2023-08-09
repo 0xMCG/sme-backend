@@ -18,10 +18,14 @@ export class CollectionController {
   }
 
   @Get("selling/top")
-  findTop() {
+  findSellingTop() {
     return this.collectionService.sellingTop();
   }
 
+  @Get("hot/top")
+  findHotTop() {
+    return this.collectionService.hotTop();
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
