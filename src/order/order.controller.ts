@@ -20,4 +20,9 @@ export class OrderController {
   findOne(@Param('hash') hash: string) {
     return this.orderService.findOne(hash);
   }
+
+  @Delete(':hash')
+  delete(@Param('hash') hash: string) {
+    return this.orderService.deleteOne(hash);
+  }
 }
