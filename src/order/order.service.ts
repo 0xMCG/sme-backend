@@ -10,10 +10,10 @@ export class OrderService {
   constructor(@InjectModel('Order') private readonly orderModel, private readonly seaportProvider: SeaportProvider) { }
 
   async create(createOrderDto: CreateOrderDto) {
-    const hash = this.seaportProvider.getProvider().getOrderHash(createOrderDto.entry.parameters as OrderComponents);
+    // const hash = this.seaportProvider.getProvider().getOrderHash(createOrderDto.entry.parameters as OrderComponents);
 
-    console.log('hash::', hash);
-    createOrderDto.hash = hash;
+    // console.log('hash::', hash);
+    // createOrderDto.hash = hash;
     let model = new this.orderModel(createOrderDto);
     return await model.save();
   }
@@ -23,6 +23,6 @@ export class OrderService {
   }
 
   async findOne(hash: string) {
-    return await this.orderModel.find({ 'hash': hash }).exec();
+    return await this.orderModel.find({ 'hash': hash }).limit(1).exec();
   }
 }
