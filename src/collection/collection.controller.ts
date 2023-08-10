@@ -7,20 +7,20 @@ import { UpdateCollectionDto } from './dto/update-collection.dto';
 export class CollectionController {
   constructor(private readonly collectionService: CollectionService) {}
 
-  @Post()
-  create(@Body() createCollectionDto: CreateCollectionDto) {
-    return this.collectionService.create(createCollectionDto);
-  }
+  // @Post()
+  // create(@Body() createCollectionDto: CreateCollectionDto) {
+  //   return this.collectionService.create(createCollectionDto);
+  // }
 
-  @Get()
-  findAll() {
-    return this.collectionService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.collectionService.findAll();
+  // }
 
-  @Get("selling/top")
-  findSellingTop() {
-    return this.collectionService.sellingTop();
-  }
+  // @Get("selling/top")
+  // findSellingTop() {
+  //   return this.collectionService.sellingTop();
+  // }
 
   @Get("hot/top")
   findHotTop() {
@@ -29,16 +29,16 @@ export class CollectionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.collectionService.findOne(+id);
+    return this.collectionService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCollectionDto: UpdateCollectionDto) {
-    return this.collectionService.update(+id, updateCollectionDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateCollectionDto: UpdateCollectionDto) {
+  //   return this.collectionService.update(+id, updateCollectionDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.collectionService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.collectionService.remove(+id);
+  // }
 }

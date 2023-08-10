@@ -2766,15 +2766,15 @@ export class CollectionService {
     return `This action returns all collection`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} collection`;
+  findOne(id: string) {
+    return this.hotTopSchema.findOne({id}).exec();;
   }
 
-  update(id: number, updateCollectionDto: UpdateCollectionDto) {
-    return `This action updates a #${id} collection`;
-  }
+  // update(id: number, updateCollectionDto: UpdateCollectionDto) {
+  //   return `This action updates a #${id} collection`;
+  // }
 
-  remove(id: number) {
-    return `This action removes a #${id} collection`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} collection`;
+  // }
 }
