@@ -29,7 +29,7 @@ export class OrderService {
     const current_timestamp = new Date().getTime() / 1000;
     return await this.orderModel.find({
       "entry.parameters.endTime": {
-        $lte: current_timestamp.toString()
+        $gte: current_timestamp.toString()
       }
     }).exec();
   }
