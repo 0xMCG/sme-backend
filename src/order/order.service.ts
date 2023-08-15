@@ -26,7 +26,12 @@ export class OrderService {
   }
 
   async findAll() {
-    return await this.orderModel.find().exec();
+    const current_timestamp = new Date().getTime() / 1000;
+    return await this.orderModel.find({
+      "entry.parameters.endTime": {
+        $lte: current_timestamp.toString()
+      }
+    }).exec();
   }
 
   async findOne(hash: string) {
