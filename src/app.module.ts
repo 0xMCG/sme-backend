@@ -5,6 +5,7 @@ import envConfig from './config/envConfig';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { OrderModule } from './order/order.module';
+import { CollectionModule } from './collection/collection.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { OrderModule } from './order/order.module';
         }
       }
     }),
-    OrderModule
+    OrderModule,
+    CollectionModule
   ],
   controllers: [AppController],
   providers: [AppService],
