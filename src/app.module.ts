@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import envConfig from './config/envConfig';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { OrderModule } from './order/order.module';
 import { CollectionModule } from './collection/collection.module';
+import { SubscribeModule } from './subscriber/subscribe.module';
 
 @Module({
   imports: [
@@ -28,6 +28,7 @@ import { CollectionModule } from './collection/collection.module';
     }),
     OrderModule,
     CollectionModule,
+    SubscribeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
