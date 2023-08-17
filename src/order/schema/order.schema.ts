@@ -31,5 +31,6 @@ export const OrderSchema = new mongoose.Schema({
             counter: String
         },
         signature: String
-    }
+    },
+    status: String
 });
