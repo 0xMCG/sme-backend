@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { CollectionService } from './collection.service';
 import { CreateCollectionDto } from './dto/create-collection.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
@@ -22,7 +30,7 @@ export class CollectionController {
   //   return this.collectionService.sellingTop();
   // }
 
-  @Get("hot/top")
+  @Get('hot/top')
   findHotTop() {
     return this.collectionService.hotTop();
   }

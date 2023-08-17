@@ -6,8 +6,10 @@ import { OrderSchema } from './schema/order.schema';
 import { SeaportProvider } from 'src/lib/seaport.provider';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Order', schema: OrderSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: 'Order', schema: OrderSchema }]),
+  ],
   controllers: [OrderController],
-  providers: [OrderService,SeaportProvider]
+  providers: [OrderService, SeaportProvider],
 })
 export class OrderModule {}

@@ -33,17 +33,17 @@
 //     "signature":"0xeec57d9f257087fa276df6512470079c1682119d7c0b2f3c4f9036c4a8ec7bdd56ad7c67e858f2b9a0b4e6ec13b15294fa03f2d149b310fd7f0388c1467ec0d0"
 // }
 
-import { ApiProperty } from "@nestjs/swagger";
-import { OrderEntry } from "../types";
+import { ApiProperty } from '@nestjs/swagger';
+import { OrderEntry } from '../types';
 
 export class CreateOrderDto {
-    @ApiProperty({
-        required: false
-    })
-    hash: string;
+  @ApiProperty({
+    required: false,
+  })
+  hash: string;
 
-    @ApiProperty({
-        type: OrderEntry
-    })
-    entry: OrderEntry
+  @ApiProperty({
+    type: OrderEntry,
+  })
+  entry: OrderEntry;
 }

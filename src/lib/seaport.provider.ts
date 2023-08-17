@@ -6,15 +6,13 @@ import { ethers } from 'ethers';
 
 @Injectable()
 export class SeaportProvider {
-    constructor(private readonly configService: ConfigService) {
-
-    }
-    getProvider(): Seaport {
-        const provider = new ethers.providers.JsonRpcProvider(
-            // "https://eth-sepolia.public.blastapi.io"
-            this.configService.get("PROVIDER")
-        );
-        const smeSeaport = new seaport.Seaport(provider);
-        return smeSeaport;
-    }
+  constructor(private readonly configService: ConfigService) {}
+  getProvider(): Seaport {
+    const provider = new ethers.providers.JsonRpcProvider(
+      // "https://eth-sepolia.public.blastapi.io"
+      this.configService.get('PROVIDER'),
+    );
+    const smeSeaport = new seaport.Seaport(provider);
+    return smeSeaport;
+  }
 }
