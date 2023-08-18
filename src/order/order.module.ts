@@ -11,5 +11,6 @@ import { SeaportProvider } from 'src/lib/seaport.provider';
   ],
   controllers: [OrderController],
   providers: [OrderService, SeaportProvider],
+  exports: [OrderService]
 })
 export class OrderModule {}

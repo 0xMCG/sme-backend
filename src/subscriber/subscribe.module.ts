@@ -8,18 +8,21 @@ import { OrderModule } from 'src/order/order.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OrderSchema } from 'src/order/schema/order.schema';
 import { SeaportProvider } from 'src/lib/seaport.provider';
+import { BlockSchema } from 'src/block/schema/block.schema';
+import { BlockService } from 'src/block/block.service';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     OrderModule,
-    MongooseModule.forFeature([{ name: 'Order', schema: OrderSchema }]),
+    MongooseModule.forFeature([{ name: 'Order', schema: OrderSchema }, { name: 'Block', schema: BlockSchema }]),
   ],
   providers: [
     ContractEventSubscribeService,
     EtherProvider,
     OrderService,
     SeaportProvider,
+    BlockService
   ],
 })
 export class SubscribeModule {}

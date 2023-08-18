@@ -3,22 +3,32 @@ import { EtherProvider } from 'src/lib/ether.provider';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OrderService } from 'src/order/order.service';
 import { OrderStatus } from 'src/order/types';
+import { BlockService } from 'src/block/block.service';
 
 @Injectable()
 export class ContractEventSubscribeService implements OnModuleInit {
   private blockNumber;
+  private _blockDBId;
   private readonly eventOrdersMatched = 'OrdersMatched';
   private readonly eventOrdersCancelled = 'OrdersCancelled';
-
 
   constructor(
     private readonly etherProvider: EtherProvider,
     private readonly orderService: OrderService,
+    private readonly blockService: BlockService,
   ) {
     this.blockNumber = 0;
   }
 
-  onModuleInit() {
+  async onModuleInit() {
+    const block = await this.blockService.findOne();
+    console.log(`block::`, block)
+    if (!block) {
+      this.blockService.create(4092331);
+    } else {
+      this.blockNumber = block.last;
+      this._blockDBId = block._id;
+    }
     this.etherProvider
       .getContract()
       .on('OrderCancelled', (event) => {
@@ -79,6 +89,7 @@ export class ContractEventSubscribeService implements OnModuleInit {
       .catch((error) => {
         console.error('Get block error:', error);
         //TODO: save current block to db
+        this.blockService.update(this._blockDBId, this.blockNumber)
       });
   }
 

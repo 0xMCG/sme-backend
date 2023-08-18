@@ -6,6 +6,7 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
 import { OrderModule } from './order/order.module';
 import { CollectionModule } from './collection/collection.module';
 import { SubscribeModule } from './subscriber/subscribe.module';
+import { BlockModule } from './block/block.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { SubscribeModule } from './subscriber/subscribe.module';
     OrderModule,
     CollectionModule,
     SubscribeModule,
+    BlockModule,
   ],
   controllers: [AppController],
   providers: [AppService],
