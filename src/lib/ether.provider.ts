@@ -13,7 +13,7 @@ export class EtherProvider {
 
   constructor(private readonly configService: ConfigService) {
     this.provider = new ethers.providers.JsonRpcProvider(
-      'https://eth-sepolia.public.blastapi.io',
+      this.configService.get('RPC_PROVIDER'),
     );
 
     this.smeSeaportAddress = '0x9c1687C953Fff856e244A152995B96e569C4762A';

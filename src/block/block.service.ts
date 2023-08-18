@@ -4,13 +4,12 @@ import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class BlockService {
-
   constructor(@InjectModel('Block') private readonly blockSchema) {}
 
   create(blockNumber: number) {
     const model = new this.blockSchema({
-      last: blockNumber
-    })
+      last: blockNumber,
+    });
     return model.save();
   }
 
@@ -19,9 +18,13 @@ export class BlockService {
   }
 
   update(id: string, block: number) {
-    return this.blockSchema.updateOne({'_id': id}, {
-      $set: { last: block }
-    }).exec();
+    return this.blockSchema
+      .updateOne(
+        { _id: id },
+        {
+          $set: { last: block },
+        },
+      )
+      .exec();
   }
-
 }
