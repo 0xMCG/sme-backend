@@ -7,6 +7,7 @@ import { OrderModule } from './order/order.module';
 import { CollectionModule } from './collection/collection.module';
 import { SubscribeModule } from './subscriber/subscribe.module';
 import { BlockModule } from './block/block.module';
+import { ContractEventSubscribeService } from './subscriber/contractEventSubscribe.service';
 
 @Module({
   imports: [
@@ -33,6 +34,6 @@ import { BlockModule } from './block/block.module';
     BlockModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ContractEventSubscribeService],
 })
 export class AppModule {}

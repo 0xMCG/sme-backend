@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
 import { EtherProvider } from 'src/lib/ether.provider';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OrderService } from 'src/order/order.service';
@@ -6,7 +6,7 @@ import { OrderStatus } from 'src/order/types';
 import { BlockService } from 'src/block/block.service';
 
 @Injectable()
-export class ContractEventSubscribeService implements OnModuleInit {
+export class ContractEventSubscribeService implements OnModuleInit, OnApplicationShutdown  {
   private blockNumber;
   private _blockDBId;
   private readonly eventOrdersMatched = 'OrdersMatched';
@@ -18,6 +18,14 @@ export class ContractEventSubscribeService implements OnModuleInit {
     private readonly blockService: BlockService,
   ) {
     this.blockNumber = 0;
+  }
+
+  async onApplicationShutdown(signal?: string) {
+    // save the current block to db when application shutdown
+    console.log('this._blockDBId:', this._blockDBId)
+    console.log('this.blockNumber:', this.blockNumber)
+    await this.blockService.update(this._blockDBId, this.blockNumber);
+    process.exit(0);
   }
 
   async onModuleInit() {
