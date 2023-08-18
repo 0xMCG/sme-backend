@@ -10,20 +10,25 @@ import { OrderSchema } from 'src/order/schema/order.schema';
 import { SeaportProvider } from 'src/lib/seaport.provider';
 import { BlockSchema } from 'src/block/schema/block.schema';
 import { BlockService } from 'src/block/block.service';
+import { MutexManager } from './MutexManager';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     OrderModule,
-    MongooseModule.forFeature([{ name: 'Order', schema: OrderSchema }, { name: 'Block', schema: BlockSchema }]),
+    MongooseModule.forFeature([
+      { name: 'Order', schema: OrderSchema },
+      { name: 'Block', schema: BlockSchema },
+    ]),
   ],
   providers: [
     ContractEventSubscribeService,
     EtherProvider,
     OrderService,
     SeaportProvider,
-    BlockService
+    BlockService,
+    MutexManager,
   ],
-  exports: [ContractEventSubscribeService]
+  exports: [ContractEventSubscribeService, MutexManager],
 })
 export class SubscribeModule {}

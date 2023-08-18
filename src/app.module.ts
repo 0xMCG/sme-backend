@@ -34,7 +34,10 @@ import { BlockSchema } from './block/schema/block.schema';
         };
       },
     }),
-    MongooseModule.forFeature([{ name: 'Order', schema: OrderSchema }, { name: 'Block', schema: BlockSchema }]),
+    MongooseModule.forFeature([
+      { name: 'Order', schema: OrderSchema },
+      { name: 'Block', schema: BlockSchema },
+    ]),
 
     OrderModule,
     CollectionModule,
@@ -42,6 +45,11 @@ import { BlockSchema } from './block/schema/block.schema';
     BlockModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ContractEventSubscribeService, EtherProvider, BlockService],
+  providers: [
+    AppService,
+    ContractEventSubscribeService,
+    EtherProvider,
+    BlockService,
+  ],
 })
 export class AppModule {}

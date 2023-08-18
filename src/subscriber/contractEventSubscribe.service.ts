@@ -1,12 +1,19 @@
-import { Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  OnApplicationShutdown,
+  OnModuleInit,
+} from '@nestjs/common';
 import { EtherProvider } from 'src/lib/ether.provider';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OrderService } from 'src/order/order.service';
 import { OrderStatus } from 'src/order/types';
 import { BlockService } from 'src/block/block.service';
+import { MutexManager } from './MutexManager';
 
 @Injectable()
-export class ContractEventSubscribeService implements OnModuleInit, OnApplicationShutdown  {
+export class ContractEventSubscribeService
+  implements OnModuleInit, OnApplicationShutdown
+{
   private blockNumber;
   private _blockDBId;
   private readonly eventOrdersMatched = 'OrdersMatched';
@@ -15,6 +22,7 @@ export class ContractEventSubscribeService implements OnModuleInit, OnApplicatio
   constructor(
     private readonly etherProvider: EtherProvider,
     private readonly orderService: OrderService,
+    private readonly mutexManager: MutexManager,
     private readonly blockService: BlockService,
   ) {
     this.blockNumber = 0;
@@ -47,14 +55,15 @@ export class ContractEventSubscribeService implements OnModuleInit, OnApplicatio
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS) // Cron expression (e.g., every hour)
-  handleCron() {
-    console.log('Running cron job every 10 seconds');
-    // if (this.blockNumber === 0) {
-    //   //TODO: Get last block from db
-    //   this.blockNumber = 4092331;
-    // }
+  async handleCron() {
+    const release = await this.mutexManager.acquireLock();
 
-    console.log('this.blockNumber::', this.blockNumber);
+    console.log(
+      'Running cron job every 5 seconds, current block: ',
+      this.blockNumber,
+    );
+
+    // console.log('this.blockNumber::', this.blockNumber);
 
     // Task logic to be executed on schedule
     this.etherProvider
@@ -62,8 +71,8 @@ export class ContractEventSubscribeService implements OnModuleInit, OnApplicatio
       .getBlockWithTransactions(this.blockNumber)
       .then((block) => {
         this.blockNumber++;
+        release();
         const transactions = block.transactions;
-
         transactions.forEach((tx) => {
           tx.wait()
             .then((receipt) => {
@@ -88,15 +97,16 @@ export class ContractEventSubscribeService implements OnModuleInit, OnApplicatio
               }
             })
             .catch((_) => {
-              console.error('Get transaction data error');
+              // console.error('Get transaction data error');
+              release();
             });
         });
       })
       .catch((error) => {
-        console.error('Get block error:', error);
+        console.error('Get block error:', this.blockNumber, error);
         --this.blockNumber;
-        //TODO: save current block to db
-        this.blockService.update(this._blockDBId, this.blockNumber)
+        release();
+        this.blockService.update(this._blockDBId, this.blockNumber);
       });
   }
 

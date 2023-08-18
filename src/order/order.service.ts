@@ -45,8 +45,8 @@ export class OrderService {
           $gte: current_timestamp.toString(),
         },
         status: {
-          $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED]
-        }
+          $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
+        },
       })
       .exec();
   }
@@ -60,8 +60,13 @@ export class OrderService {
   }
 
   async updateOrderStatus(hash: string, status: string) {
-    return this.orderModel.updateOne({ hash }, {
-      $set: { status }
-    }).exec();
+    return this.orderModel
+      .updateOne(
+        { hash },
+        {
+          $set: { status },
+        },
+      )
+      .exec();
   }
 }

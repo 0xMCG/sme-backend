@@ -5,10 +5,8 @@ import { BlockSchema } from './schema/block.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: 'Block', schema: BlockSchema },
-    ]),
+    MongooseModule.forFeature([{ name: 'Block', schema: BlockSchema }]),
   ],
-  providers: [BlockService]
+  providers: [BlockService],
 })
 export class BlockModule {}
