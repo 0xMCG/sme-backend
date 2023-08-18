@@ -22,17 +22,16 @@ export class ContractEventSubscribeService implements OnModuleInit, OnApplicatio
 
   async onApplicationShutdown(signal?: string) {
     // save the current block to db when application shutdown
-    console.log('this._blockDBId:', this._blockDBId)
-    console.log('this.blockNumber:', this.blockNumber)
     await this.blockService.update(this._blockDBId, this.blockNumber);
     process.exit(0);
   }
 
   async onModuleInit() {
     const block = await this.blockService.findOne();
-    console.log(`block::`, block)
     if (!block) {
-      this.blockService.create(4092331);
+      const result = await this.blockService.create(4092331);
+      this._blockDBId = result._id;
+      this.blockNumber = result.last;
     } else {
       this.blockNumber = block.last;
       this._blockDBId = block._id;
@@ -50,11 +49,10 @@ export class ContractEventSubscribeService implements OnModuleInit, OnApplicatio
   @Cron(CronExpression.EVERY_10_SECONDS) // Cron expression (e.g., every hour)
   handleCron() {
     console.log('Running cron job every 10 seconds');
-    if (this.blockNumber === 0) {
-      //TODO: Get last block from db
-
-      this.blockNumber = 4092331;
-    }
+    // if (this.blockNumber === 0) {
+    //   //TODO: Get last block from db
+    //   this.blockNumber = 4092331;
+    // }
 
     console.log('this.blockNumber::', this.blockNumber);
 

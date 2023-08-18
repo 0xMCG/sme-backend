@@ -8,6 +8,12 @@ import { CollectionModule } from './collection/collection.module';
 import { SubscribeModule } from './subscriber/subscribe.module';
 import { BlockModule } from './block/block.module';
 import { ContractEventSubscribeService } from './subscriber/contractEventSubscribe.service';
+import { EtherProvider } from './lib/ether.provider';
+import { BlockService } from './block/block.service';
+import { SeaportProvider } from './lib/seaport.provider';
+import { OrderService } from './order/order.service';
+import { OrderSchema } from './order/schema/order.schema';
+import { BlockSchema } from './block/schema/block.schema';
 
 @Module({
   imports: [
@@ -28,12 +34,14 @@ import { ContractEventSubscribeService } from './subscriber/contractEventSubscri
         };
       },
     }),
+    MongooseModule.forFeature([{ name: 'Order', schema: OrderSchema }, { name: 'Block', schema: BlockSchema }]),
+
     OrderModule,
     CollectionModule,
     SubscribeModule,
     BlockModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ContractEventSubscribeService],
+  providers: [AppService, ContractEventSubscribeService, EtherProvider, BlockService],
 })
 export class AppModule {}

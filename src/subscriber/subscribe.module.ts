@@ -24,5 +24,6 @@ import { BlockService } from 'src/block/block.service';
     SeaportProvider,
     BlockService
   ],
+  exports: [ContractEventSubscribeService]
 })
 export class SubscribeModule {}
