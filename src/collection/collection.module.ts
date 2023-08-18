@@ -7,8 +7,13 @@ import { HotTopSchema } from './schema/hot.top.schema';
 import { SellingTop } from './schema/selling.top.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'HotTop', schema: HotTopSchema }, { name: 'SellingTop', schema: SellingTop }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: 'HotTop', schema: HotTopSchema },
+      { name: 'SellingTop', schema: SellingTop },
+    ]),
+  ],
   controllers: [CollectionController],
-  providers: [CollectionService, ReservoirApi]
+  providers: [CollectionService, ReservoirApi],
 })
 export class CollectionModule {}

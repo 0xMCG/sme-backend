@@ -6,10 +6,11 @@ import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class CollectionService {
-
-  constructor(private readonly reservoirApi: ReservoirApi, 
+  constructor(
+    private readonly reservoirApi: ReservoirApi,
     @InjectModel('HotTop') private readonly hotTopSchema,
-    @InjectModel('SellingTop') private readonly sellingTopSchema){}
+    @InjectModel('SellingTop') private readonly sellingTopSchema,
+  ) {}
 
   create(createCollectionDto: CreateCollectionDto) {
     return 'This action adds a new collection';
@@ -2753,12 +2754,11 @@ export class CollectionService {
     //   }
     // ];
 
-    
     // for (const hotTop of hotTops) {
     //   let model = new this.hotTopSchema(hotTop);
     //   model.save()
     // }
-    
+
     return this.hotTopSchema.find({}).limit(20).exec();
   }
 
@@ -2767,7 +2767,7 @@ export class CollectionService {
   }
 
   findOne(id: string) {
-    return this.hotTopSchema.findOne({id}).exec();;
+    return this.hotTopSchema.findOne({ id }).exec();
   }
 
   // update(id: number, updateCollectionDto: UpdateCollectionDto) {
