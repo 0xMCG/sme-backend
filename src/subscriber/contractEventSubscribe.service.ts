@@ -2,10 +2,14 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { EtherProvider } from 'src/lib/ether.provider';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OrderService } from 'src/order/order.service';
+import { OrderStatus } from 'src/order/types';
 
 @Injectable()
 export class ContractEventSubscribeService implements OnModuleInit {
   private blockNumber;
+  private readonly eventOrdersMatched = 'OrdersMatched';
+  private readonly eventOrdersCancelled = 'OrdersCancelled';
+
 
   constructor(
     private readonly etherProvider: EtherProvider,
@@ -18,10 +22,10 @@ export class ContractEventSubscribeService implements OnModuleInit {
     this.etherProvider
       .getContract()
       .on('OrderCancelled', (event) => {
-        console.log('收到OrderCancelled事件数据:', event.args);
+        console.log('Get OrderCancelled event data:', event.args);
       })
       .on('OrdersMatched', (event) => {
-        console.log('收到OrdersMatched事件数据:', event.args);
+        console.log('Get OrdersMatched event data:', event.args);
       });
   }
 
@@ -29,14 +33,13 @@ export class ContractEventSubscribeService implements OnModuleInit {
   handleCron() {
     console.log('Running cron job every 10 seconds');
     if (this.blockNumber === 0) {
-      //TODO: 从db中获取最后同步的区块
+      //TODO: Get last block from db
 
       this.blockNumber = 4092331;
     }
 
     console.log('this.blockNumber::', this.blockNumber);
 
-    const eventName = 'OrdersMatched';
     // Task logic to be executed on schedule
     this.etherProvider
       .getProvider()
@@ -45,11 +48,10 @@ export class ContractEventSubscribeService implements OnModuleInit {
         this.blockNumber++;
         const transactions = block.transactions;
 
-        // 遍历交易，获取事件日志
         transactions.forEach((tx) => {
           tx.wait()
             .then((receipt) => {
-              // 解析日志
+              // parse log
               for (const log of receipt.logs || []) {
                 if (log.address != this.etherProvider.getContract().address) {
                   continue;
@@ -57,19 +59,34 @@ export class ContractEventSubscribeService implements OnModuleInit {
                 const event = this.etherProvider
                   .getContract()
                   .interface.parseLog(log);
-                if (event && event.name === eventName) {
+                if (event && event.name === this.eventOrdersMatched) {
+                  const hashes = event.args['orderHashes'] as [];
+                  for (const hash of hashes) {
+                    this.handleOrderMatched(hash);
+                  }
+                }
+                if (event && event.name === this.eventOrdersCancelled) {
+                  // TODO: Get cancelled event args
                   console.log('event.args', event.args);
                 }
               }
             })
             .catch((_) => {
-              console.error('获取交易收据时出错');
+              console.error('Get transaction data error');
             });
         });
       })
       .catch((error) => {
-        console.error('获取块时出错:', error);
-        //TODO: 将当前blocknumber存入db
+        console.error('Get block error:', error);
+        //TODO: save current block to db
       });
+  }
+
+  handleOrderMatched(orderHash: string) {
+    this.orderService.updateOrderStatus(orderHash, OrderStatus.MATCHED);
+  }
+
+  handleOrderCancelled(orderHash: string) {
+    this.orderService.updateOrderStatus(orderHash, OrderStatus.CANCELLED);
   }
 }

@@ -70,7 +70,7 @@ class OrderEntry {
 
 export { Offer, Consideration, OrderEntry };
 
-export declare enum OrderStatus {
+export enum OrderStatus {
   CANCELLED = 'Cancelled',
   MATCHED = 'Matched',
   VALID = 'Valid',

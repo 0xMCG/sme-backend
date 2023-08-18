@@ -54,4 +54,10 @@ export class OrderService {
   async deleteOne(hash: string) {
     return this.orderModel.deleteOne({ hash: hash }).exec();
   }
+
+  async updateOrderStatus(hash: string, status: string) {
+    return this.orderModel.updateOne({ hash }, {
+      $set: { status }
+    }).exec();
+  }
 }
