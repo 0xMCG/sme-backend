@@ -46,7 +46,7 @@ export class ContractEventSubscribeService implements OnModuleInit, OnApplicatio
       });
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS) // Cron expression (e.g., every hour)
+  @Cron(CronExpression.EVERY_5_SECONDS) // Cron expression (e.g., every hour)
   handleCron() {
     console.log('Running cron job every 10 seconds');
     // if (this.blockNumber === 0) {
@@ -94,6 +94,7 @@ export class ContractEventSubscribeService implements OnModuleInit, OnApplicatio
       })
       .catch((error) => {
         console.error('Get block error:', error);
+        --this.blockNumber;
         //TODO: save current block to db
         this.blockService.update(this._blockDBId, this.blockNumber)
       });
