@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { SeaportProvider } from 'src/lib/seaport.provider';
+import { OrderStatus } from './types';
 
 @Injectable()
 export class OrderService {
@@ -43,6 +44,9 @@ export class OrderService {
         'entry.parameters.endTime': {
           $gte: current_timestamp.toString(),
         },
+        status: {
+          $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED]
+        }
       })
       .exec();
   }
