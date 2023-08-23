@@ -1,19 +1,45 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+} from '@nestjs/common';
 import { SystemService } from './system.service';
 import { CreateSystemDto } from './dto/create-system.dto';
 import { UpdateSystemDto } from './dto/update-system.dto';
+import { Web3AuthGuardInterceptor } from 'src/web3-auth-guard/web3-auth-guard.interceptor';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('system')
 export class SystemController {
-  constructor(private readonly systemService: SystemService) {}
+  private platformFee;
+
+  constructor(
+    private readonly systemService: SystemService,
+    private readonly configService: ConfigService,
+  ) {
+    this.platformFee = this.configService.get('PLATFORM_FEE');
+  }
 
   @Post()
-  create(@Body() createSystemDto: CreateSystemDto) {
-    return this.systemService.create(createSystemDto);
+  @UseInterceptors(Web3AuthGuardInterceptor)
+  create(@Body() data: any) {
+    console.log('executor', data)
+    return this.systemService.create(data);
+  }
+
+  @Get('platformFee')
+  getPlatformFee() {
+    return this.platformFee;
   }
 
   @Get()
-  findAll() {
+  findAll(@Param('executor') executor: any) {
+    console.log('executor', executor)
     return this.systemService.findAll();
   }
 
