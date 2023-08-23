@@ -1,11 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateSystemDto } from './dto/create-system.dto';
 import { UpdateSystemDto } from './dto/update-system.dto';
+import { EtherProvider } from 'src/lib/ether.provider';
 
 @Injectable()
 export class SystemService {
-  create(createSystemDto: CreateSystemDto) {
-    return 'This action adds a new system';
+
+  constructor(private readonly etherProvider: EtherProvider) {}
+
+  async create(data: any) {
+    const contract = this.etherProvider.getErc721Contract();
+    const owner = await contract.ownerOf(data.tokenId);
+    // if (owner === data.executor) {
+    //   return owner;
+    // } else {
+    //   throw new ForbiddenException("Not owner")
+    // }
+    return owner;
   }
 
   findAll() {
