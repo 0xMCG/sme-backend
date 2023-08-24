@@ -9,7 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { SystemService } from './system.service';
-import { CreateSystemDto } from './dto/create-system.dto';
+import { Royalties } from './dto/create-royalties.dto';
 import { UpdateSystemDto } from './dto/update-system.dto';
 import { Web3AuthGuardInterceptor } from 'src/web3-auth-guard/web3-auth-guard.interceptor';
 import { ConfigService } from '@nestjs/config';
@@ -25,11 +25,11 @@ export class SystemController {
     this.platformFee = this.configService.get('PLATFORM_FEE');
   }
 
-  @Post()
+  @Post('upsertNftRoyalties')
   @UseInterceptors(Web3AuthGuardInterceptor)
-  create(@Body() data: any) {
+  upsertNftRoyalties(@Body() data: Royalties) {
     console.log('executor', data)
-    return this.systemService.create(data);
+    return this.systemService.upsertNftRoyalties(data);
   }
 
   @Get('platformFee')
