@@ -69,16 +69,16 @@ export class Web3AuthGuardInterceptor implements NestInterceptor {
         'ascii',
       );
 
-      // 3. Parse AuthToken as `ChainType[crust/cru]-AccountAddress:SignedMsg`
+      // 3. Parse AuthToken as `ChainType[eth]-AccountAddress:SignedMsg`
       const [passedAddress, signature, signMsg] = _.split(
         credentials,
         pkSigDelimiter,
       );
 
-      // 4. Extract chain type, default: 'cru' if not specified
+      // 4. Extract chain type, default: 'eth' if not specified
       const gaugedAddress = _.includes(passedAddress, chainTypeDelimiter)
         ? passedAddress
-        : `cru${chainTypeDelimiter}${passedAddress}`;
+        : `eth${chainTypeDelimiter}${passedAddress}`;
 
       const [_chainName, address] = _.split(gaugedAddress, chainTypeDelimiter);
 
