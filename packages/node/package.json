@@ -1,0 +1,21 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/cmd.tool.ts",
+  "bin": {
+    "sme-node": "./src/cmd.tool.ts"
+  },
+  "scripts": {
+    "start": "ts-node src/cmd.tool.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.6.0",
+    "commander": "^11.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
