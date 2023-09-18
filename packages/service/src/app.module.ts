@@ -14,6 +14,7 @@ import { SeaportProvider } from './lib/seaport.provider';
 import { OrderService } from './order/order.service';
 import { OrderSchema } from './order/schema/order.schema';
 import { BlockSchema } from './block/schema/block.schema';
+import { SystemModule } from './system/system.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { BlockSchema } from './block/schema/block.schema';
     CollectionModule,
     SubscribeModule,
     BlockModule,
+    SystemModule,
   ],
   controllers: [AppController],
   providers: [
