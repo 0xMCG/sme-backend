@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Command } from 'commander';
+import { PythonService } from '../python/python.service';
 import { AppModule } from '../app.module';
 const CryptoJS = require('crypto-js');
 
@@ -13,13 +14,11 @@ export class NodeCommand {
   
   private encryptionKey: any;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService, private readonly pythonService: PythonService) {
     // @ts-ignore
     this.program = new Command();
     this.encryptionKey = this.configService.get('KEY');
-
-    console.log("this.encryptionKey", this.encryptionKey)
-
+    // console.log("this.encryptionKey", this.encryptionKey)
     this.program
       .command('en [privateKey]')
       .description('encrypt private Key')
@@ -39,6 +38,13 @@ export class NodeCommand {
       .description('start app')
       .action(() => {
         this.startBackgroundProgram();
+      });
+
+    this.program
+      .command('py')
+      .description('py exec')
+      .action(() => {
+        this.pythonExec();
       });
   }
 
@@ -61,5 +67,10 @@ export class NodeCommand {
   private async startBackgroundProgram(): Promise<void> {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     await app.listen(3000);
+  }
+
+  private async pythonExec(): Promise<void> {
+    const data = await this.pythonService.executeScript('./src/python/generate_beta_distribution.py', []);
+    console.log('data', data)
   }
 }

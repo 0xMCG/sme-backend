@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ContractEventSubscribeService } from './subscriber/contractEventSubscribe.service';
 import { EtherProvider } from './lib/ether.provider';
 import { ScheduleModule } from '@nestjs/schedule';
+import { PythonService } from './python/python.service';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     SubscriberModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ContractEventSubscribeService, EtherProvider],
+  providers: [AppService, ContractEventSubscribeService, EtherProvider, PythonService],
 })
 export class AppModule {}
