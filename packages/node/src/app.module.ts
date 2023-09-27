@@ -35,6 +35,5 @@ import { TaskModule } from './task/task.module';
     WebSocketClient,
     SeaportProvider,
   ],
-  providers: [AppService, ContractEventSubscribeService, EtherProvider, PythonService],
 })
 export class AppModule {}
