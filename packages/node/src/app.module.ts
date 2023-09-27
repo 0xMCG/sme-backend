@@ -7,6 +7,10 @@ import { ContractEventSubscribeService } from './subscriber/contractEventSubscri
 import { EtherProvider } from './lib/ether.provider';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PythonService } from './python/python.service';
+import { WebSocketClientModule } from './websocket/websocket.client.module';
+import { WebSocketClient } from './websocket/websocket.client';
+import { SeaportProvider } from './lib/seaport.provider';
+import { GlobalModule } from './global.module';
 
 @Module({
   imports: [
@@ -17,8 +21,17 @@ import { PythonService } from './python/python.service';
       envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
     }),
     SubscriberModule,
+    WebSocketClientModule,
+    GlobalModule
   ],
   controllers: [AppController],
-  providers: [AppService, ContractEventSubscribeService, EtherProvider, PythonService],
+  providers: [
+    AppService,
+    ContractEventSubscribeService,
+    EtherProvider,
+    PythonService,
+    WebSocketClient,
+    SeaportProvider,
+  ],
 })
 export class AppModule {}

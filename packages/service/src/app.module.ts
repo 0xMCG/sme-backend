@@ -15,6 +15,9 @@ import { OrderService } from './order/order.service';
 import { OrderSchema } from './order/schema/order.schema';
 import { BlockSchema } from './block/schema/block.schema';
 import { SystemModule } from './system/system.module';
+import { SmeWebsocketGateway } from './websocket/sme.websocket.gateway';
+import { TaskModule } from './task/task.module';
+import { GlobalModule } from './global.module';
 
 @Module({
   imports: [
@@ -45,6 +48,8 @@ import { SystemModule } from './system/system.module';
     SubscribeModule,
     BlockModule,
     SystemModule,
+    TaskModule,
+    GlobalModule
   ],
   controllers: [AppController],
   providers: [
@@ -52,6 +57,7 @@ import { SystemModule } from './system/system.module';
     ContractEventSubscribeService,
     EtherProvider,
     BlockService,
+    SmeWebsocketGateway
   ],
 })
 export class AppModule {}

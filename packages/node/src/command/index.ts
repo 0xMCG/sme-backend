@@ -11,10 +11,13 @@ const CryptoJS = require('crypto-js');
 @Injectable()
 export class NodeCommand {
   private program: Command;
-  
+
   private encryptionKey: any;
 
-  constructor(private readonly configService: ConfigService, private readonly pythonService: PythonService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly pythonService: PythonService,
+  ) {
     // @ts-ignore
     this.program = new Command();
     this.encryptionKey = this.configService.get('KEY');
@@ -25,7 +28,7 @@ export class NodeCommand {
       .action((privateKey) => {
         this.handleEncryptedPrivateKey(privateKey);
       });
-    
+
     this.program
       .command('de [encryptedPrivateKey]')
       .description('decrypt private key')
@@ -46,16 +49,29 @@ export class NodeCommand {
       .action(() => {
         this.pythonExec();
       });
+
+    // this.program
+    //   .command('ws')
+    //   .description('py exec')
+    //   .action(() => {
+    //     this.wsExec();
+    // });
   }
 
   private async handleEncryptedPrivateKey(privateKey: string) {
     const password = this.encryptionKey; // 加密密码
-    const encryptedPrivateKey = CryptoJS.AES.encrypt(privateKey, password).toString();
+    const encryptedPrivateKey = CryptoJS.AES.encrypt(
+      privateKey,
+      password,
+    ).toString();
     console.log('Encrypted Private Key:', encryptedPrivateKey);
   }
 
   private async handleDecryptedPrivateKey(encryptedPrivateKey: string) {
-    const decryptedBytes = CryptoJS.AES.decrypt(encryptedPrivateKey, this.encryptionKey);
+    const decryptedBytes = CryptoJS.AES.decrypt(
+      encryptedPrivateKey,
+      this.encryptionKey,
+    );
     const decryptedPrivateKey = decryptedBytes.toString(CryptoJS.enc.Utf8);
     console.log('Decrypted Private Key:', decryptedPrivateKey);
   }
@@ -66,11 +82,14 @@ export class NodeCommand {
 
   private async startBackgroundProgram(): Promise<void> {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
-    await app.listen(3000);
+    await app.listen(3001);
   }
 
   private async pythonExec(): Promise<void> {
-    const data = await this.pythonService.executeScript('./src/python/generate_beta_distribution.py', []);
-    console.log('data', data)
+    const data = await this.pythonService.executeScript(
+      './src/python/generate_beta_distribution.py',
+      [],
+    );
+    console.log('data', data);
   }
 }

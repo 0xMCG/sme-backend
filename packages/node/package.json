@@ -6,6 +6,15 @@
   "private": true,
   "license": "UNLICENSED",
   "bin": "dist/cli.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "directories": {
+    "doc": "docs",
+    "lib": "lib"
+  },
   "scripts": {
     "cli": "ts-node src/cli.ts",
     "build": "nest build",
@@ -29,6 +38,7 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/schedule": "^3.0.2",
+    "@nestjs/websockets": "^10.2.5",
     "commander": "^7.1.0",
     "crypto-js": "^4.1.1",
     "ethers": "^5.7.2",
@@ -36,6 +46,9 @@
     "python-shell": "^5.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
+    "ws": "^8.14.1",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

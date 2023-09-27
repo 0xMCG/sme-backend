@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
-import { SeaportABIvSME } from '../abi/Seaport_vSME';
-import { ERC721ABI } from 'src/abi/ERC721';
+import { SeaportABIvVRF } from '../abi/Seaport_VRF';
+import { ERC721ABI } from '../abi/ERC721';
 
 @Injectable()
 export class EtherProvider {
@@ -27,7 +27,7 @@ export class EtherProvider {
 
     this.contract = new ethers.Contract(
       this.smeSeaportAddress,
-      SeaportABIvSME,
+      SeaportABIvVRF,
       this.provider,
     );
 
