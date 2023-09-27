@@ -3,7 +3,7 @@ import { spawn } from 'child_process';
 
 @Injectable()
 export class PythonService {
-  executeScript(scriptPath: string, args: string[]): Promise<string> {
+  executeScript(scriptPath: string, args: any[]): Promise<string> {
     return new Promise((resolve, reject) => {
       const pythonProcess = spawn('python', [scriptPath, ...args]);
 

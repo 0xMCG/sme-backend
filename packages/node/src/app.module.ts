@@ -11,6 +11,7 @@ import { WebSocketClientModule } from './websocket/websocket.client.module';
 import { WebSocketClient } from './websocket/websocket.client';
 import { SeaportProvider } from './lib/seaport.provider';
 import { GlobalModule } from './global.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { GlobalModule } from './global.module';
     }),
     SubscriberModule,
     WebSocketClientModule,
-    GlobalModule
+    GlobalModule,
+    TaskModule
   ],
   controllers: [AppController],
   providers: [

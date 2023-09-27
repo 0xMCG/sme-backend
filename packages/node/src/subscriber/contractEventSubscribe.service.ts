@@ -4,6 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { MutexManager } from './MutexManager';
 import { ConfigService } from '@nestjs/config';
 import { SeaportProvider } from '../lib/seaport.provider';
+import { TaskPublisher } from '../task/task.publisher';
 
 @Injectable()
 export class ContractEventSubscribeService {

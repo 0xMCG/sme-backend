@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { MapContainer } from '../map.container';
 import { SeaportProvider } from '../lib/seaport.provider';
 import { EtherProvider } from '../lib/ether.provider';
+import { TaskPublisher } from '../task/task.publisher';
 
 @Injectable()
 export class WebSocketClient {
@@ -10,7 +11,10 @@ export class WebSocketClient {
 
   constructor(private readonly seaportProvider: SeaportProvider,
     private readonly etherProvider: EtherProvider,
-    private readonly mapContainer: MapContainer) {
+    private readonly mapContainer: MapContainer,
+    private readonly taskPublisher: TaskPublisher,
+    
+    ) {
     this.client = io('ws://localhost:3000');
 
     this.client.on('open', () => {
@@ -136,7 +140,6 @@ export class WebSocketClient {
           .getTransactionReceipt('0x33722ae86151c898b6c7e69e97389c8bc6fce7dcaa6d5bb58aeb9898bb935fa7')
 
           .then((receipt) => {
-            console.log('receipt:::', receipt)
 
             for (const log of receipt.logs || []) {
               // if (log.address != this.etherProvider.getContract().address) {
@@ -145,11 +148,20 @@ export class WebSocketClient {
               const event = this.etherProvider
                 .getContract()
                 .interface.parseLog(log);
-              console.log('event:::', event);
               
 
               if (event && event.name === 'ReturnedRandomness') {
                 const randomWords = event.args['randomWords'] as [];
+                console.log('randomWords:::', randomWords);
+
+                console.log('Task publisher 推送消息')
+                this.taskPublisher.emitTaskEvent({
+                  requestId: "",
+                  takerOrder: [],
+                  makerOrder: [],
+                  premiumOrder: [],
+                  randomNumber: randomWords
+                })
                 this.sendMessage(
                   JSON.stringify({
                     key,

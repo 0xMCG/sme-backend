@@ -6,6 +6,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { Command } from 'commander';
 import { PythonService } from '../python/python.service';
 import { AppModule } from '../app.module';
+import { ethers } from 'ethers';
 const CryptoJS = require('crypto-js');
 
 @Injectable()
@@ -86,10 +87,15 @@ export class NodeCommand {
   }
 
   private async pythonExec(): Promise<void> {
+    const bigNumber = ethers.BigNumber.from('0x46d6ad4957e14d6dded30169ad258a84198c7c50a3f3f9dbaac4528f44a638bd');
     const data = await this.pythonService.executeScript(
       './src/python/generate_beta_distribution.py',
-      [],
+      [bigNumber.toString()],
     );
-    console.log('data', data);
+
+    const result = JSON.parse(data);
+    console.log('data', result);
+    console.log('data0', result[0]);
+    console.log('data1', result[1]);
   }
 }
