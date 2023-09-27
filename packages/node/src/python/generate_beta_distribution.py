@@ -12,7 +12,7 @@ result = []
 def calculte(randomWord):
     randomWord = randomWord % 1000
     randomWord = randomWord * 1.0 / 1000
-    y = betaincinv(alpha, beta, 1)
+    y = betaincinv(alpha, beta, randomWord)
     y_numerator = int(y * denominator)
     y_denominator = int(denominator)
     result.append(y_numerator)
