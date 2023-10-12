@@ -26,7 +26,8 @@ export class EtherProvider {
 
 
     this.contract = new ethers.Contract(
-      this.smeSeaportAddress,
+      // this.smeSeaportAddress,
+      '0xC619D985a88e341B618C23a543B8Efe2c55D1b37',
       SeaportABIvVRF,
       this.provider,
     );

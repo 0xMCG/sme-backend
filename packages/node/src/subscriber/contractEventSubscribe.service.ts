@@ -5,20 +5,30 @@ import { MutexManager } from './MutexManager';
 import { ConfigService } from '@nestjs/config';
 import { SeaportProvider } from '../lib/seaport.provider';
 import { TaskPublisher } from '../task/task.publisher';
+import { MapContainer } from '../map.container';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class ContractEventSubscribeService {
   private blockNumber;
   private readonly eventOrdersMatched = 'OrdersMatched';
   private readonly eventOrdersCancelled = 'OrdersCancelled';
+  static instance: any;
 
   constructor(
     private readonly etherProvider: EtherProvider,
-    private readonly seaportProvider: SeaportProvider,
     private readonly mutexManager: MutexManager,
     private configService: ConfigService,
+    private readonly mapContainer: MapContainer,
+    private readonly taskPublisher: TaskPublisher,
   ) {
-    this.blockNumber = this.configService.get('START_BLOCK');
+    if (ContractEventSubscribeService.instance) {
+      return ContractEventSubscribeService.instance;
+    }
+    // this.blockNumber = this.configService.get('START_BLOCK');
+    this.blockNumber = 4461745;
+
+    ContractEventSubscribeService.instance = this;
   }
 
   // async onModuleInit() {
@@ -43,96 +53,143 @@ export class ContractEventSubscribeService {
     );
 
     // Task logic to be executed on schedule
-    // this.etherProvider
-    //   .getProvider()
-    //   .getBlockWithTransactions(this.blockNumber)
-    //   .then((block) => {
-    //     this.blockNumber++;
-    //     release();
-    //     const transactions = block.transactions;
-    //     transactions.forEach((tx) => {
-    //       tx.wait()
-    //         .then((receipt) => {
-    //           // parse log
-    //           for (const log of receipt.logs || []) {
-    //             if (log.address != this.etherProvider.getContract().address) {
-    //               continue;
-    //             }
-    //             const event = this.etherProvider
-    //               .getContract()
-    //               .interface.parseLog(log);
-    //             if (event && event.name === this.eventOrdersMatched) {
-    //               const hashes = event.args['orderHashes'] as [];
-    //               for (const hash of hashes) {
-    //                 this.handleOrderMatched(hash);
-    //               }
-    //             }
-    //             if (event && event.name === this.eventOrdersCancelled) {
-    //               // TODO: Get cancelled event args
-    //               console.log('event.args', event.args);
-    //             }
-    //           }
-    //         })
-    //         .catch((_) => {
-    //           // console.error('Get transaction data error');
-    //           release();
-    //         });
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     console.error('Get block error:', this.blockNumber, error);
-    //     --this.blockNumber;
-    //     release();
-    //     // this.blockService.update(this._blockDBId, this.blockNumber);
-    //   });
+    this.etherProvider
+      .getProvider()
+      .getBlockWithTransactions(this.blockNumber)
+      .then((block) => {
+        this.blockNumber++;
+        release();
+        const transactions = block.transactions;
+
+        transactions.forEach((tx) => {
+          tx.wait()
+            .then((receipt) => {
+              // parse log
+              for (const log of receipt.logs || []) {
+
+                if (log.address != '0xC619D985a88e341B618C23a543B8Efe2c55D1b37') {
+                  continue;
+                }
+                try {
+                  const event = this.etherProvider
+                  .getContract()
+                  .interface.parseLog(log);
+
+                  if (event && event.name === 'ReturnedRandomness') {
+                    const randomWords = event.args['randomWords'].map(e => ethers.BigNumber.from(e).toString());
+                    const requestId = event.args['requestId'].toString();
+                    console.log('randomWords:::', randomWords);
+                    console.log('requestId:::', requestId);
+
+                    const isExist = this.mapContainer.get(requestId);
+                    if (isExist) {
+                      isExist.randomWords = randomWords;
+                      this.mapContainer.set(requestId, isExist);
+                    } else {
+                      this.mapContainer.set(requestId, {
+                        randomWords
+                      })
+                    }
+                    console.log('this.mapContainer:::', this.mapContainer)
+                    console.log('Task publisher 推送消息')
+                    this.taskPublisher.emitTaskEvent({
+                      requestId,
+                      takerOrder: [],
+                      makerOrder: [],
+                      premiumOrder: [],
+                      randomWords: randomWords
+                    })
+                  }
+                } catch (error) {
+                  console.log('hahhahaha::::', error)
+                }
+                
+
+                
+              }
+            })
+            .catch((error) => {
+              // console.error('Get transaction data error', error.message);
+              release();
+            });
+        });
+      })
+      .catch((error) => {
+        console.error('Get block error:', this.blockNumber, error);
+        --this.blockNumber;
+        release();
+        // this.blockService.update(this._blockDBId, this.blockNumber);
+      });
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleLastBlockCron() {
-    // const lastBlockNumber = await this.etherProvider
-    //   .getProvider()
-    //   .getBlockNumber();
-    // console.log('Get last block cron, last block number', lastBlockNumber);
-    // this.etherProvider
-    //   .getProvider()
-    //   .getBlockWithTransactions(lastBlockNumber)
-    //   .then((block) => {
-    //     const transactions = block.transactions;
-    //     transactions.forEach((tx) => {
-    //       tx.wait()
-    //         .then((receipt) => {
-    //           // parse log
-    //           for (const log of receipt.logs || []) {
-    //             if (log.address != this.etherProvider.getContract().address) {
-    //               continue;
-    //             }
-    //             const event = this.etherProvider
-    //               .getContract()
-    //               .interface.parseLog(log);
-    //             if (event && event.name === this.eventOrdersMatched) {
-    //               const hashes = event.args['orderHashes'] as [];
-    //               for (const hash of hashes) {
-    //                 this.handleOrderMatched(hash);
-    //               }
-    //             }
-    //             if (event && event.name === this.eventOrdersCancelled) {
-    //               // TODO: Get cancelled event args
-    //               console.log('event.args', event.args);
-    //             }
-    //           }
-    //         })
-    //         .catch((_) => {
-    //           // console.error('Get transaction data error');
-    //         });
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     console.error(
-    //       'Get last block cron, get block error:',
-    //       this.blockNumber,
-    //       error,
-    //     );
-    //   });
+    const lastBlockNumber = await this.etherProvider
+      .getProvider()
+      .getBlockNumber();
+    console.log('Get last block cron, last block number', lastBlockNumber);
+    this.etherProvider
+      .getProvider()
+      .getBlockWithTransactions(lastBlockNumber)
+      .then((block) => {
+        const transactions = block.transactions;
+        transactions.forEach((tx) => {
+          tx.wait()
+            .then((receipt) => {
+              // parse log
+              for (const log of receipt.logs || []) {
+
+                if (log.address != '0xC619D985a88e341B618C23a543B8Efe2c55D1b37') {
+                  continue;
+                }
+                try {
+                  const event = this.etherProvider
+                  .getContract()
+                  .interface.parseLog(log);
+
+                  if (event && event.name === 'ReturnedRandomness') {
+                    const randomWords = event.args['randomWords'].map(e => ethers.BigNumber.from(e).toString());
+                    const requestId = event.args['requestId'].toString();
+                    console.log('randomWords:::', randomWords);
+                    console.log('requestId:::', requestId);
+
+                    const isExist = this.mapContainer.get(requestId);
+                    if (isExist) {
+                      isExist.randomWords = randomWords;
+                      this.mapContainer.set(requestId, isExist);
+                    } else {
+                      this.mapContainer.set(requestId, {
+                        randomWords
+                      })
+                    }
+                    console.log('this.mapContainer:::', this.mapContainer)
+                    console.log('Task publisher 推送消息')
+                    this.taskPublisher.emitTaskEvent({
+                      requestId,
+                      takerOrder: [],
+                      makerOrder: [],
+                      premiumOrder: [],
+                      randomWords: randomWords
+                    })
+                  }
+                } catch (error) {
+                  console.log('hahhahaha::::', error)
+                }
+
+              }
+            })
+            .catch((error) => {
+              // console.error('Get transaction data error', error.message);
+            });
+        });
+      })
+      .catch((error) => {
+        console.error(
+          'Get last block cron, get block error:',
+          this.blockNumber,
+          error,
+        );
+      });
   }
 
   handleOrderMatched(orderHash: string) {

@@ -45,6 +45,11 @@ const SeaportABIvVRF = [
     anonymous: false,
     inputs: [
       {
+        internalType: 'uint256',
+        name: 'requestId',
+        type: 'uint256',
+      },
+      {
         indexed: false,
         internalType: 'uint256[]',
         name: 'randomWords',
