@@ -12,7 +12,7 @@ export const CONDUIT_KEYS_TO_CONDUIT = {
     '0x0681bc8f138ca32ed7725b91e8d11cfb6e10eb5f',
 };
 
-const smeSeaportAddress = '0xFBAf7DB4A17B0Ed9841cB8DeF69Eb0CFD52276aF';
+const smeSeaportAddress = '0xC6254AB94dA896e758fE5aB82d22fA137a358ae9';
 
 const testERC20Address2 = "0x6c877a0f432feaab6052d8cc4ae2cf3d686d589f";
 const testERC20Address = "0x8D4E2c8bc6b1E4Fa0ED829E6786E9096dd6DC265";
@@ -23,6 +23,8 @@ export class SeaportProvider {
   private signer: Wallet;
 
   private provider;
+
+  private seaport;
 
   private testContract;
 
@@ -41,9 +43,15 @@ export class SeaportProvider {
     this.signer = Signer;
     this.testContract = new Contract('0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625', testAbi);
 
+    this.seaport = new Seaport(Signer,  {overrides: {contractAddress: smeSeaportAddress}, conduitKeyToConduit: CONDUIT_KEYS_TO_CONDUIT});
+
   }
   getProvider(): Seaport {
     return this.provider;
+  }
+
+  getSeaport(): Seaport {
+    return this.seaport;
   }
 
   getContract(): SMESeaport {

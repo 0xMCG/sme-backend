@@ -19,4 +19,8 @@ export class MapContainer {
   delete(key: string): boolean {
     return this.globalMap.delete(key);
   }
+
+  size(): number {
+    return this.globalMap.size;
+  }
 }

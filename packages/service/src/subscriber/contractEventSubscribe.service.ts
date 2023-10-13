@@ -18,6 +18,7 @@ export class ContractEventSubscribeService
   private _blockDBId;
   private readonly eventOrdersMatched = 'OrdersMatched';
   private readonly eventOrdersCancelled = 'OrdersCancelled';
+  static instance: any;
 
   constructor(
     private readonly etherProvider: EtherProvider,
@@ -26,6 +27,12 @@ export class ContractEventSubscribeService
     private readonly blockService: BlockService,
   ) {
     this.blockNumber = 0;
+
+    if (ContractEventSubscribeService.instance) {
+      return ContractEventSubscribeService.instance;
+    }
+
+    ContractEventSubscribeService.instance = this;
   }
 
   async onApplicationShutdown(signal?: string) {
@@ -44,117 +51,117 @@ export class ContractEventSubscribeService
       this.blockNumber = block.last;
       this._blockDBId = block._id;
     }
-    this.etherProvider
-      .getContract()
-      .on('OrderCancelled', (event) => {
-        console.log('Get OrderCancelled event data:', event.args);
-      })
-      .on('OrdersMatched', (event) => {
-        console.log('Get OrdersMatched event data:', event.args);
-      });
+    // this.etherProvider
+    //   .getContract()
+    //   .on('OrderCancelled', (event) => {
+    //     console.log('Get OrderCancelled event data:', event.args);
+    //   })
+    //   .on('OrdersMatched', (event) => {
+    //     console.log('Get OrdersMatched event data:', event.args);
+    //   });
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS) // Cron expression (e.g., every hour)
   async handleHistoryBlockCron() {
-    const release = await this.mutexManager.acquireLock();
+    // const release = await this.mutexManager.acquireLock();
 
-    console.log(
-      'Running get history block cron job every 10 seconds, current block: ',
-      this.blockNumber,
-    );
+    // console.log(
+    //   'Running get history block cron job every 10 seconds, current block: ',
+    //   this.blockNumber,
+    // );
 
-    // Task logic to be executed on schedule
-    this.etherProvider
-      .getProvider()
-      .getBlockWithTransactions(this.blockNumber)
-      .then((block) => {
-        this.blockNumber++;
-        release();
-        const transactions = block.transactions;
-        transactions.forEach((tx) => {
-          tx.wait()
-            .then((receipt) => {
-              // parse log
-              for (const log of receipt.logs || []) {
-                if (log.address != this.etherProvider.getContract().address) {
-                  continue;
-                }
-                const event = this.etherProvider
-                  .getContract()
-                  .interface.parseLog(log);
-                if (event && event.name === this.eventOrdersMatched) {
-                  const hashes = event.args['orderHashes'] as [];
-                  for (const hash of hashes) {
-                    this.handleOrderMatched(hash);
-                  }
-                }
-                if (event && event.name === this.eventOrdersCancelled) {
-                  // TODO: Get cancelled event args
-                  console.log('event.args', event.args);
-                }
-              }
-            })
-            .catch((_) => {
-              // console.error('Get transaction data error');
-              release();
-            });
-        });
-      })
-      .catch((error) => {
-        console.error('Get block error:', this.blockNumber, error);
-        --this.blockNumber;
-        release();
-        this.blockService.update(this._blockDBId, this.blockNumber);
-      });
+    // // Task logic to be executed on schedule
+    // this.etherProvider
+    //   .getProvider()
+    //   .getBlockWithTransactions(this.blockNumber)
+    //   .then((block) => {
+    //     this.blockNumber++;
+    //     release();
+    //     const transactions = block.transactions;
+    //     transactions.forEach((tx) => {
+    //       tx.wait()
+    //         .then((receipt) => {
+    //           // parse log
+    //           for (const log of receipt.logs || []) {
+    //             if (log.address != this.etherProvider.getContract().address) {
+    //               continue;
+    //             }
+    //             const event = this.etherProvider
+    //               .getContract()
+    //               .interface.parseLog(log);
+    //             if (event && event.name === this.eventOrdersMatched) {
+    //               const hashes = event.args['orderHashes'] as [];
+    //               for (const hash of hashes) {
+    //                 this.handleOrderMatched(hash);
+    //               }
+    //             }
+    //             if (event && event.name === this.eventOrdersCancelled) {
+    //               // TODO: Get cancelled event args
+    //               console.log('event.args', event.args);
+    //             }
+    //           }
+    //         })
+    //         .catch((_) => {
+    //           // console.error('Get transaction data error');
+    //           release();
+    //         });
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     console.error('Get block error:', this.blockNumber, error);
+    //     --this.blockNumber;
+    //     release();
+    //     this.blockService.update(this._blockDBId, this.blockNumber);
+    //   });
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleLastBlockCron() {
-    const lastBlockNumber = await this.etherProvider
-      .getProvider()
-      .getBlockNumber();
+    // const lastBlockNumber = await this.etherProvider
+    //   .getProvider()
+    //   .getBlockNumber();
 
-    console.log('Get last block cron, last block number', lastBlockNumber);
-    this.etherProvider
-      .getProvider()
-      .getBlockWithTransactions(lastBlockNumber)
-      .then((block) => {
-        const transactions = block.transactions;
-        transactions.forEach((tx) => {
-          tx.wait()
-            .then((receipt) => {
-              // parse log
-              for (const log of receipt.logs || []) {
-                if (log.address != this.etherProvider.getContract().address) {
-                  continue;
-                }
-                const event = this.etherProvider
-                  .getContract()
-                  .interface.parseLog(log);
-                if (event && event.name === this.eventOrdersMatched) {
-                  const hashes = event.args['orderHashes'] as [];
-                  for (const hash of hashes) {
-                    this.handleOrderMatched(hash);
-                  }
-                }
-                if (event && event.name === this.eventOrdersCancelled) {
-                  // TODO: Get cancelled event args
-                  console.log('event.args', event.args);
-                }
-              }
-            })
-            .catch((_) => {
-              // console.error('Get transaction data error');
-            });
-        });
-      })
-      .catch((error) => {
-        console.error(
-          'Get last block cron, get block error:',
-          this.blockNumber,
-          error,
-        );
-      });
+    // console.log('Get last block cron, last block number', lastBlockNumber);
+    // this.etherProvider
+    //   .getProvider()
+    //   .getBlockWithTransactions(lastBlockNumber)
+    //   .then((block) => {
+    //     const transactions = block.transactions;
+    //     transactions.forEach((tx) => {
+    //       tx.wait()
+    //         .then((receipt) => {
+    //           // parse log
+    //           for (const log of receipt.logs || []) {
+    //             if (log.address != this.etherProvider.getContract().address) {
+    //               continue;
+    //             }
+    //             const event = this.etherProvider
+    //               .getContract()
+    //               .interface.parseLog(log);
+    //             if (event && event.name === this.eventOrdersMatched) {
+    //               const hashes = event.args['orderHashes'] as [];
+    //               for (const hash of hashes) {
+    //                 this.handleOrderMatched(hash);
+    //               }
+    //             }
+    //             if (event && event.name === this.eventOrdersCancelled) {
+    //               // TODO: Get cancelled event args
+    //               console.log('event.args', event.args);
+    //             }
+    //           }
+    //         })
+    //         .catch((_) => {
+    //           // console.error('Get transaction data error');
+    //         });
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     console.error(
+    //       'Get last block cron, get block error:',
+    //       this.blockNumber,
+    //       error,
+    //     );
+    //   });
   }
 
   handleOrderMatched(orderHash: string) {

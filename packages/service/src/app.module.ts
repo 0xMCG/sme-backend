@@ -18,6 +18,9 @@ import { SystemModule } from './system/system.module';
 import { SmeWebsocketGateway } from './websocket/sme.websocket.gateway';
 import { TaskModule } from './task/task.module';
 import { GlobalModule } from './global.module';
+import { TaskService } from './task/task.service';
+import { SmeWebsocketGatewayModule } from './websocket/sme.websocket.gateway.module';
+import { TaskSchema } from './task/schema/task.shema';
 
 @Module({
   imports: [
@@ -41,6 +44,7 @@ import { GlobalModule } from './global.module';
     MongooseModule.forFeature([
       { name: 'Order', schema: OrderSchema },
       { name: 'Block', schema: BlockSchema },
+      { name: 'Task', schema: TaskSchema },
     ]),
 
     OrderModule,
@@ -49,7 +53,8 @@ import { GlobalModule } from './global.module';
     BlockModule,
     SystemModule,
     TaskModule,
-    GlobalModule
+    GlobalModule,
+    SmeWebsocketGatewayModule
   ],
   controllers: [AppController],
   providers: [
@@ -57,7 +62,8 @@ import { GlobalModule } from './global.module';
     ContractEventSubscribeService,
     EtherProvider,
     BlockService,
-    SmeWebsocketGateway
+    SmeWebsocketGateway,
+    TaskService
   ],
 })
 export class AppModule {}

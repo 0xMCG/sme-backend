@@ -28,7 +28,7 @@ class Consideration {
   recipient: string;
 }
 
-class OrderParameter {
+export class OrderParameter {
   @ApiProperty()
   offerer: string;
   @ApiProperty()
@@ -74,4 +74,10 @@ export enum OrderStatus {
   CANCELLED = 'Cancelled',
   MATCHED = 'Matched',
   VALID = 'Valid',
+}
+
+export enum TaskStatus {
+  REQUESTED = 'requested random number',
+  PENDING = 'pending',
+  MATCHED = 'matched',
 }

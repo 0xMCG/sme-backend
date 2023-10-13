@@ -6,7 +6,8 @@ export interface Task {
     randomWords: any[];
     makerOrder?: any[];
     takerOrder?: any[];
-    premiumOrder?: any[]
+    premiumOrder?: any[];
+    modeOrderFulfillments: any[]
 }
 
 @Injectable()
