@@ -68,6 +68,11 @@ class OrderEntry {
   signature: string;
 }
 
+export enum OrderType {
+  MAKER = '1',
+  TAKER = '2'
+}
+
 export { Offer, Consideration, OrderEntry };
 
 export enum OrderStatus {
@@ -80,4 +85,9 @@ export enum TaskStatus {
   REQUESTED = 'requested random number',
   PENDING = 'pending',
   MATCHED = 'matched',
+}
+
+export class OrderQueryParams {
+  status: string;
+  type: string
 }

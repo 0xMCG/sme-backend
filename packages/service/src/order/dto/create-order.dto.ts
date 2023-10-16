@@ -34,7 +34,7 @@
 // }
 
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderEntry } from '../types';
+import { OrderEntry, OrderType } from '../types';
 
 export class CreateOrderDto {
   @ApiProperty({
@@ -46,4 +46,10 @@ export class CreateOrderDto {
     type: OrderEntry,
   })
   entry: OrderEntry;
+
+  @ApiProperty({
+    required: true,
+    enum: OrderType
+  })
+  type: OrderType;
 }

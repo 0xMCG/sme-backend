@@ -21,7 +21,7 @@ export class EtherProvider {
       this.configService.get('RPC_PROVIDER'),
     );
 
-    this.smeSeaportAddress = '0x9c1687C953Fff856e244A152995B96e569C4762A';
+    this.smeSeaportAddress = '0xC6254AB94dA896e758fE5aB82d22fA137a358ae9';
     this.erc721Address = "0xE4E39D40d1b9c70dcd115FEA8DaEF242194f2cC7"
 
 

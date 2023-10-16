@@ -37,4 +37,5 @@ export const OrderSchema = new mongoose.Schema({
     signature: String,
   },
   status: String,
+  type: String
 });

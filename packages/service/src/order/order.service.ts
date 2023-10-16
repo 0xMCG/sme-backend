@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { SeaportProvider } from '../lib/seaport.provider';
-import { OrderStatus } from './types';
+import { OrderQueryParams, OrderStatus } from './types';
 
 @Injectable()
 export class OrderService {
@@ -37,7 +37,7 @@ export class OrderService {
     return await model.save();
   }
 
-  async findAll() {
+  async findAll(query: OrderQueryParams) {
     const current_timestamp = new Date().getTime() / 1000;
     return await this.orderModel
       .find({
@@ -47,6 +47,7 @@ export class OrderService {
         status: {
           $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
         },
+        type: query.type
       })
       .exec();
   }

@@ -6,9 +6,11 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { OrderQueryParams } from './types';
 
 @Controller('order')
 export class OrderController {
@@ -20,8 +22,8 @@ export class OrderController {
   }
 
   @Get()
-  findAll() {
-    return this.orderService.findAll();
+  findAll(@Query() query: OrderQueryParams) {
+    return this.orderService.findAll(query);
   }
 
   @Get(':hash')
