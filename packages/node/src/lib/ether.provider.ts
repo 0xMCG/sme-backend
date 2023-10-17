@@ -22,8 +22,7 @@ export class EtherProvider {
     );
 
     this.smeSeaportAddress = '0xC6254AB94dA896e758fE5aB82d22fA137a358ae9';
-    this.erc721Address = "0xE4E39D40d1b9c70dcd115FEA8DaEF242194f2cC7"
-
+    this.erc721Address = '0xE4E39D40d1b9c70dcd115FEA8DaEF242194f2cC7';
 
     this.contract = new ethers.Contract(
       // this.smeSeaportAddress,
@@ -35,8 +34,8 @@ export class EtherProvider {
     this.erc721Contract = new ethers.Contract(
       this.erc721Address,
       ERC721ABI,
-      this.provider
-    )
+      this.provider,
+    );
   }
 
   getProvider() {

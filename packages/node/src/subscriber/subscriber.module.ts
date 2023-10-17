@@ -11,7 +11,7 @@ import { MutexManager } from './MutexManager';
     EtherProvider,
     SeaportProvider,
     MutexManager,
-    TaskPublisher
+    TaskPublisher,
   ],
   exports: [ContractEventSubscribeService, MutexManager],
 })

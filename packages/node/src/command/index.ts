@@ -87,7 +87,9 @@ export class NodeCommand {
   }
 
   private async pythonExec(): Promise<void> {
-    const bigNumber = ethers.BigNumber.from('0x46d6ad4957e14d6dded30169ad258a84198c7c50a3f3f9dbaac4528f44a638bd');
+    const bigNumber = ethers.BigNumber.from(
+      '0x46d6ad4957e14d6dded30169ad258a84198c7c50a3f3f9dbaac4528f44a638bd',
+    );
     const data = await this.pythonService.executeScript(
       './src/python/generate_beta_distribution.py',
       [bigNumber.toString()],

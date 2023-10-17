@@ -1,9 +1,13 @@
 import { Injectable, Scope } from '@nestjs/common';
 import { io, Socket } from 'socket.io-client';
 import { MapContainer } from '../map.container';
-import { CONDUIT_KEYS_TO_CONDUIT, SeaportProvider } from '../lib/seaport.provider';
+import {
+  CONDUIT_KEYS_TO_CONDUIT,
+  SeaportProvider,
+} from '../lib/seaport.provider';
 import { EtherProvider } from '../lib/ether.provider';
 import { TaskPublisher } from '../task/task.publisher';
+import { MatchOrdersFulfillment } from '@opensea/seaport-js/lib/types';
 
 function sleep(ms: any) {
   return new Promise((resolve) => {
@@ -16,17 +20,14 @@ export class WebSocketClient {
   public client: Socket;
   static instance: any;
 
-  constructor(private readonly seaportProvider: SeaportProvider,
+  constructor(
+    private readonly seaportProvider: SeaportProvider,
     private readonly etherProvider: EtherProvider,
     private readonly mapContainer: MapContainer,
     private readonly taskPublisher: TaskPublisher,
-
   ) {
-
     if (WebSocketClient.instance) {
-
       return WebSocketClient.instance;
-
     }
 
     this.client = io('ws://localhost:3000');
@@ -40,12 +41,12 @@ export class WebSocketClient {
 
     this.client.on('task1', async (message) => {
       console.log('Received message:', message);
-      
+
       const task = JSON.parse(message);
       const key = task?.key;
       const value = task?.value;
 
-      // value的数据格式是: 
+      // value的数据格式是:
       // randomNumberCount: number
       // randomStrategy: number
       // takerOrders: OrderEntry[];
@@ -62,6 +63,68 @@ export class WebSocketClient {
       const contract = this.seaportProvider.getContract();
 
       // const [takerOrder, makerOrder, makerOrder2] = await this.seaportProvider.build_bid_scenario();
+      // const takerOrders = [takerOrder];
+      // const makerOrders = [makerOrder, makerOrder2];
+      // const randomStrategy = 0;
+
+      // const modeOrderFulfillments: MatchOrdersFulfillment[] = [];
+      // modeOrderFulfillments.push({
+      //   offerComponents: [
+      //     {
+      //       orderIndex: 0,
+      //       itemIndex: 0,
+      //     },
+      //   ],
+      //   considerationComponents: [
+      //     {
+      //       orderIndex: 2,
+      //       itemIndex: 0,
+      //     },
+      //   ],
+      // });
+      // modeOrderFulfillments.push({
+      //   offerComponents: [
+      //     {
+      //       orderIndex: 2,
+      //       itemIndex: 0,
+      //     },
+      //   ],
+      //   considerationComponents: [
+      //     {
+      //       orderIndex: 0,
+      //       itemIndex: 0,
+      //     },
+      //   ],
+      // });
+
+      // modeOrderFulfillments.push({
+      //   offerComponents: [
+      //     {
+      //       orderIndex: 1,
+      //       itemIndex: 0,
+      //     },
+      //   ],
+      //   considerationComponents: [
+      //     {
+      //       orderIndex: 2,
+      //       itemIndex: 0,
+      //     },
+      //   ],
+      // });
+      // modeOrderFulfillments.push({
+      //   offerComponents: [
+      //     {
+      //       orderIndex: 2,
+      //       itemIndex: 0,
+      //     },
+      //   ],
+      //   considerationComponents: [
+      //     {
+      //       orderIndex: 1,
+      //       itemIndex: 0,
+      //     },
+      //   ],
+      // });
 
       // console.log('takerOrder:', JSON.stringify(takerOrder))
       // console.log('makerOrder:', JSON.stringify(makerOrder))
@@ -79,18 +142,17 @@ export class WebSocketClient {
         //     { gasLimit: 1000000 },
         //   )
 
-          const result = await contract
-          .prepare(
-            [...makerOrders, ...takerOrders],
-            // premiumOrder在前面数组的下标
-            [],
-            [],
-            // 2个随机数
-            randomNumberCount,
-            { gasLimit: 1000000 },
-          )
+        const result = await contract.prepare(
+          [...makerOrders, ...takerOrders],
+          // premiumOrder在前面数组的下标
+          [],
+          [],
+          // 2个随机数
+          randomNumberCount,
+          { gasLimit: 1000000 },
+        );
 
-        console.log('result.hash:::', result.hash)
+        console.log('result.hash:::', result.hash);
 
         let receipt = null;
 
@@ -99,59 +161,61 @@ export class WebSocketClient {
         while (receipt === null && retryCount < 20) {
           console.log('123');
           retryCount++;
-          receipt = await this.etherProvider.getProvider().getTransactionReceipt(result.hash)
+          receipt = await this.etherProvider
+            .getProvider()
+            .getTransactionReceipt(result.hash);
           await sleep(6000); // 等待6秒后继续检查交易确认
         }
 
-        console.log('receipt:::', receipt)
+        console.log('receipt:::', receipt);
 
         if (receipt && receipt.status) {
           for (const log of receipt.logs || []) {
-              if (log.address != '0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625') {
-                continue;
-              }
-              const event = this.seaportProvider
-                .getTestContract()
-                .interface.parseLog(log);
-              if (event && event.name === 'RandomWordsRequested') {
-                const requestId = event.args['requestId']?.toString();
-                console.log('requestId:::', requestId);
-                // this.taskPublisher.emitTaskEvent({
-                //   requestId: "",
-                //   takerOrder: [],
-                //   makerOrder: [],
-                //   premiumOrder: [],
-                //   randomNumber: randomWords
-                // })
-                // this.mapContainer.set(requestId, {
-                //   makerOrders: [makerOrder, makerOrder2],
-                //   takerOrders: [takerOrder],
-                //   randomWords: 2
-                // })
-
-                this.mapContainer.set(requestId, {
-                  makerOrders: makerOrders,
-                  takerOrders: takerOrders,
-                  randomStrategy,
-                  modeOrderFulfillments
-                })
-                // this.mapContainer.set(requestId, value)
-                this.sendMessage(
-                  JSON.stringify({
-                    key,
-                    value: requestId,
-                  }),
-                );
-              }
+            if (log.address != '0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625') {
+              continue;
             }
-          } else {
-            this.sendMessage(
-              JSON.stringify({
-                key,
-                value: 'Send tx failed',
-              }),
-            );
+            const event = this.seaportProvider
+              .getTestContract()
+              .interface.parseLog(log);
+            if (event && event.name === 'RandomWordsRequested') {
+              const requestId = event.args['requestId']?.toString();
+              console.log('requestId:::', requestId);
+              // this.taskPublisher.emitTaskEvent({
+              //   requestId: "",
+              //   takerOrder: [],
+              //   makerOrder: [],
+              //   premiumOrder: [],
+              //   randomNumber: randomWords
+              // })
+              // this.mapContainer.set(requestId, {
+              //   makerOrders: [makerOrder, makerOrder2],
+              //   takerOrders: [takerOrder],
+              //   randomWords: 2
+              // })
+
+              this.mapContainer.set(requestId, {
+                makerOrders: makerOrders,
+                takerOrders: takerOrders,
+                randomStrategy,
+                modeOrderFulfillments,
+              });
+              // this.mapContainer.set(requestId, value)
+              this.sendPrepareMessage(
+                JSON.stringify({
+                  key,
+                  value: requestId,
+                }),
+              );
+            }
           }
+        } else {
+          this.sendPrepareMessage(
+            JSON.stringify({
+              key,
+              value: 'Send tx failed',
+            }),
+          );
+        }
 
         // this.etherProvider.getProvider()
         //   .getTransactionReceipt(result.hash)
@@ -194,23 +258,21 @@ export class WebSocketClient {
         //   .catch((error) => {
         //     console.error("get transaction error::", error)
         //   });
-
-
       } catch (error) {
         console.error(error);
-        this.sendMessage(
+        this.sendPrepareMessage(
           JSON.stringify({
             key,
             value: error.message,
           }),
         );
       } finally {
-        this.sendMessage(
-          JSON.stringify({
-            key,
-            value: 'Send tx failed',
-          }),
-        );
+        // this.sendPrepareMessage(
+        //   JSON.stringify({
+        //     key,
+        //     value: 'Send tx failed',
+        //   }),
+        // );
       }
     });
 
@@ -219,7 +281,7 @@ export class WebSocketClient {
       const task = JSON.parse(message);
       const key = task?.key;
       const value = task?.value;
-      this.sendMessage(
+      this.sendPrepareMessage(
         JSON.stringify({
           key,
           value,
@@ -230,11 +292,13 @@ export class WebSocketClient {
     this.client.on('close', () => {
       console.log('Disconnected from WebSocket server');
     });
-
   }
 
-  sendMessage(message: string) {
+  sendPrepareMessage(message: string) {
     this.client.emit('prepare', message);
   }
 
+  sendProbabilityMessage(message: string) {
+    this.client.emit('probability', message);
+  }
 }

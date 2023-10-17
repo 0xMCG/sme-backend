@@ -49,4 +49,12 @@ export class SmeWebsocketGateway {
     return payload;
   }
 
+  @SubscribeMessage('probability')
+  handleProbabilityMessage(client: Socket, @MessageBody() payload: any) {
+    console.log('Received matched message:', payload);
+    const receivedPayload = JSON.parse(payload);
+    // 将收到的信息保存到数据库
+    return payload;
+  }
+
 }

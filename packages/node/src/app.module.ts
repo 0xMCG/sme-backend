@@ -24,7 +24,7 @@ import { TaskModule } from './task/task.module';
     SubscriberModule,
     WebSocketClientModule,
     GlobalModule,
-    TaskModule
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [
