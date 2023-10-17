@@ -122,9 +122,7 @@ export class ContractEventSubscribeService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleLastBlockCron() {
-
-    console.log('this.mapContainer:::', this.mapContainer)
-
+    
     if (this.mapContainer.size() === 0) return;
     
     const lastBlockNumber = await this.etherProvider.getProvider().getBlockNumber();
@@ -162,6 +160,7 @@ export class ContractEventSubscribeService {
                         requestId,
                         takerOrder: isExist.takerOrders,
                         makerOrder: isExist.makerOrders,
+                        randomStrategy: isExist.randomStrategy,
                         premiumOrder: [],
                         randomWords: randomWords,
                         modeOrderFulfillments: isExist.modeOrderFulfillments

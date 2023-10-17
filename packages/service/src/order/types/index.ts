@@ -69,8 +69,8 @@ class OrderEntry {
 }
 
 export enum OrderType {
-  MAKER = '1',
-  TAKER = '2'
+  BID = '1',
+  SELL = '2'
 }
 
 export { Offer, Consideration, OrderEntry };
@@ -89,5 +89,6 @@ export enum TaskStatus {
 
 export class OrderQueryParams {
   status: string;
-  type: string
+  type: string;
+  offerer: string;
 }

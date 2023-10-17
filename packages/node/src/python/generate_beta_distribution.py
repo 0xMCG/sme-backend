@@ -9,9 +9,15 @@ denominator = 1e4
 
 result = []
 
-def calculte(randomWord):
+def calculte(randomWord, strategy):
     randomWord = randomWord % 1000
     randomWord = randomWord * 1.0 / 1000
+    if (strategy == 0):
+        alpha = 3
+        beta = 3
+    else:
+        alpha = 2
+        beta = 2
     y = betaincinv(alpha, beta, randomWord)
     y_numerator = int(y * denominator)
     y_denominator = int(denominator)
@@ -20,5 +26,6 @@ def calculte(randomWord):
     return result
 
 arg1 = int(sys.argv[1])
-result = calculte(arg1)
+arg2 = int(sys.argv[2])
+result = calculte(arg1, arg2)
 print(result)

@@ -55,6 +55,7 @@ export class WebSocketClient {
 
       const takerOrders = value.takerOrders;
       const makerOrders = value.makerOrders;
+      const randomStrategy = value.randomStrategy;
       const modeOrderFulfillments = value.modeOrderFulfillments;
       const randomNumberCount = value.randomNumberCount;
 
@@ -131,6 +132,7 @@ export class WebSocketClient {
                 this.mapContainer.set(requestId, {
                   makerOrders: makerOrders,
                   takerOrders: takerOrders,
+                  randomStrategy,
                   modeOrderFulfillments
                 })
                 // this.mapContainer.set(requestId, value)

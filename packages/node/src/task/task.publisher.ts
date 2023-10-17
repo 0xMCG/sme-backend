@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 
 export interface Task {
     requestId: string;
+    randomStrategy: any;
     randomWords: any[];
     makerOrder?: any[];
     takerOrder?: any[];

@@ -84,7 +84,7 @@ export class TaskSubscriber {
           // const bigNumber = data.randomWords[0];
           const execResult = await this.pythonService.executeScript(
             './src/python/generate_beta_distribution.py',
-            [bigNumber.toString()],
+            [bigNumber.toString(), data.randomStrategy],
           );
           const result = JSON.parse(execResult);
           console.log('execResult', result);
@@ -103,7 +103,7 @@ export class TaskSubscriber {
           // const bigNumber = data.randomWords[0];
           const execResult = await this.pythonService.executeScript(
             './src/python/generate_beta_distribution.py',
-            [bigNumber.toString()],
+            [bigNumber.toString(), data.randomStrategy],
           );
           const result = JSON.parse(execResult);
           console.log('execResult', result);

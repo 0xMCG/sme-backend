@@ -47,7 +47,8 @@ export class OrderService {
         status: {
           $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
         },
-        type: query.type
+        type: query.type,
+        'entry.parameters.offerer': query.offerer
       })
       .exec();
   }
