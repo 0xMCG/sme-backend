@@ -68,7 +68,7 @@ export class ContractEventSubscribeService {
     //           // parse log
     //           for (const log of receipt.logs || []) {
 
-    //             if (log.address != '0xC619D985a88e341B618C23a543B8Efe2c55D1b37') {
+    //             if (log.address != '0xd3B2C0B21D63e8b9701c0daFFaADf3d05A642415') {
     //               continue;
     //             }
     //             try {
@@ -122,7 +122,7 @@ export class ContractEventSubscribeService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleLastBlockCron() {
-    
+
     if (this.mapContainer.size() === 0) return;
     
     const lastBlockNumber = await this.etherProvider.getProvider().getBlockNumber();
@@ -138,7 +138,7 @@ export class ContractEventSubscribeService {
               // parse log
               for (const log of receipt.logs || []) {
 
-                if (log.address != '0xC619D985a88e341B618C23a543B8Efe2c55D1b37') {
+                if (log.address != '0xd3B2C0B21D63e8b9701c0daFFaADf3d05A642415') {
                   continue;
                 }
                 try {

@@ -94,12 +94,12 @@ export class WebSocketClient {
 
         let receipt = null;
 
-        while (receipt === null) {
+        let retryCount = 0;
 
+        while (receipt === null && retryCount < 20) {
           console.log('123');
-
+          retryCount++;
           receipt = await this.etherProvider.getProvider().getTransactionReceipt(result.hash)
-
           await sleep(6000); // 等待6秒后继续检查交易确认
         }
 
@@ -144,6 +144,13 @@ export class WebSocketClient {
                 );
               }
             }
+          } else {
+            this.sendMessage(
+              JSON.stringify({
+                key,
+                value: 'Send tx failed',
+              }),
+            );
           }
 
         // this.etherProvider.getProvider()
@@ -191,8 +198,19 @@ export class WebSocketClient {
 
       } catch (error) {
         console.error(error);
+        this.sendMessage(
+          JSON.stringify({
+            key,
+            value: error.message,
+          }),
+        );
       } finally {
-
+        this.sendMessage(
+          JSON.stringify({
+            key,
+            value: 'Send tx failed',
+          }),
+        );
       }
     });
 
