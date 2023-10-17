@@ -39,17 +39,23 @@ export class OrderService {
 
   async findAll(query: OrderQueryParams) {
     const current_timestamp = new Date().getTime() / 1000;
+    const conditionQuery = {'entry.parameters.endTime': {
+      $gte: current_timestamp.toString(),
+    },
+    status: {
+      $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
+    }};
+
+    if (query.type) {
+      conditionQuery['type'] = query.type;
+    }
+
+    if (query.offerer) {
+      conditionQuery['offerer'] = query.offerer;
+    }
+
     return await this.orderModel
-      .find({
-        'entry.parameters.endTime': {
-          $gte: current_timestamp.toString(),
-        },
-        status: {
-          $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
-        },
-        type: query.type,
-        'entry.parameters.offerer': query.offerer
-      })
+      .find(conditionQuery)
       .exec();
   }
 
