@@ -51,7 +51,7 @@ export class OrderService {
     }
 
     if (query.offerer) {
-      conditionQuery['offerer'] = query.offerer;
+      conditionQuery['entry.parameters.offerer'] = query.offerer;
     }
 
     return await this.orderModel
