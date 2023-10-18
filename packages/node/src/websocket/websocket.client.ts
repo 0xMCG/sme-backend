@@ -54,77 +54,77 @@ export class WebSocketClient {
       // modeOrderFulfillments: MatchOrdersFulfillment[];
       // this.mapContainer.set(key, value);
 
-      const takerOrders = value.takerOrders;
-      const makerOrders = value.makerOrders;
-      const randomStrategy = value.randomStrategy;
-      const modeOrderFulfillments = value.modeOrderFulfillments;
-      const randomNumberCount = value.randomNumberCount;
+      // const takerOrders = value.takerOrders;
+      // const makerOrders = value.makerOrders;
+      // const randomStrategy = value.randomStrategy;
+      // const modeOrderFulfillments = value.modeOrderFulfillments;
+      // const randomNumberCount = value.randomNumberCount;
 
       const contract = this.seaportProvider.getContract();
 
-      // const [takerOrder, makerOrder, makerOrder2] = await this.seaportProvider.build_bid_scenario();
-      // const takerOrders = [takerOrder];
-      // const makerOrders = [makerOrder, makerOrder2];
-      // const randomStrategy = 0;
+      const [takerOrder, makerOrder, makerOrder2] = await this.seaportProvider.build_bid_scenario();
+      const takerOrders = [takerOrder];
+      const makerOrders = [makerOrder, makerOrder2];
+      const randomStrategy = 0;
+      const randomNumberCount = 2;
+      const modeOrderFulfillments: MatchOrdersFulfillment[] = [];
+      modeOrderFulfillments.push({
+        offerComponents: [
+          {
+            orderIndex: 0,
+            itemIndex: 0,
+          },
+        ],
+        considerationComponents: [
+          {
+            orderIndex: 2,
+            itemIndex: 0,
+          },
+        ],
+      });
+      modeOrderFulfillments.push({
+        offerComponents: [
+          {
+            orderIndex: 2,
+            itemIndex: 0,
+          },
+        ],
+        considerationComponents: [
+          {
+            orderIndex: 0,
+            itemIndex: 0,
+          },
+        ],
+      });
 
-      // const modeOrderFulfillments: MatchOrdersFulfillment[] = [];
-      // modeOrderFulfillments.push({
-      //   offerComponents: [
-      //     {
-      //       orderIndex: 0,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      //   considerationComponents: [
-      //     {
-      //       orderIndex: 2,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      // });
-      // modeOrderFulfillments.push({
-      //   offerComponents: [
-      //     {
-      //       orderIndex: 2,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      //   considerationComponents: [
-      //     {
-      //       orderIndex: 0,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      // });
-
-      // modeOrderFulfillments.push({
-      //   offerComponents: [
-      //     {
-      //       orderIndex: 1,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      //   considerationComponents: [
-      //     {
-      //       orderIndex: 2,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      // });
-      // modeOrderFulfillments.push({
-      //   offerComponents: [
-      //     {
-      //       orderIndex: 2,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      //   considerationComponents: [
-      //     {
-      //       orderIndex: 1,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      // });
+      modeOrderFulfillments.push({
+        offerComponents: [
+          {
+            orderIndex: 1,
+            itemIndex: 0,
+          },
+        ],
+        considerationComponents: [
+          {
+            orderIndex: 2,
+            itemIndex: 0,
+          },
+        ],
+      });
+      modeOrderFulfillments.push({
+        offerComponents: [
+          {
+            orderIndex: 2,
+            itemIndex: 0,
+          },
+        ],
+        considerationComponents: [
+          {
+            orderIndex: 1,
+            itemIndex: 0,
+          },
+        ],
+      });
 
       // console.log('takerOrder:', JSON.stringify(takerOrder))
       // console.log('makerOrder:', JSON.stringify(makerOrder))

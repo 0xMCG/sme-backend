@@ -64,7 +64,7 @@ export class ContractEventSubscribeService {
     //         .then((receipt) => {
     //           // parse log
     //           for (const log of receipt.logs || []) {
-    //             if (log.address != '0xd3B2C0B21D63e8b9701c0daFFaADf3d05A642415') {
+    //             if (log.address != '0xC619D985a88e341B618C23a543B8Efe2c55D1b37') {
     //               continue;
     //             }
     //             try {
@@ -118,6 +118,8 @@ export class ContractEventSubscribeService {
   async handleLastBlockCron() {
     if (this.mapContainer.size() === 0) return;
 
+    const release = await this.mutexManager.acquireLock();
+
     const lastBlockNumber = await this.etherProvider
       .getProvider()
       .getBlockNumber();
@@ -126,6 +128,7 @@ export class ContractEventSubscribeService {
       .getProvider()
       .getBlockWithTransactions(lastBlockNumber)
       .then((block) => {
+        release();
         const transactions = block.transactions;
         transactions.forEach((tx) => {
           tx.wait()
@@ -133,7 +136,7 @@ export class ContractEventSubscribeService {
               // parse log
               for (const log of receipt.logs || []) {
                 if (
-                  log.address != '0xd3B2C0B21D63e8b9701c0daFFaADf3d05A642415'
+                  log.address != '0xC619D985a88e341B618C23a543B8Efe2c55D1b37'
                 ) {
                   continue;
                 }
@@ -190,6 +193,7 @@ export class ContractEventSubscribeService {
         });
       })
       .catch((error) => {
+        release();
         console.error(
           'Get last block cron, get block error:',
           this.blockNumber,

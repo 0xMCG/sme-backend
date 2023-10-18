@@ -61,8 +61,32 @@ export class ContractEventSubscribeService
     //   });
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS) // Cron expression (e.g., every hour)
+  @Cron(CronExpression.EVERY_MINUTE) // Cron expression (e.g., every hour)
   async handleHistoryBlockCron() {
+    const seaportContract = this.etherProvider.getSeaportContract();
+    const provider = this.etherProvider.getProvider();
+
+    let filter = seaportContract.filters.OrdersMatched();
+    let filterLog = {
+      fromBlock : 0,
+      toBlock : 'latest',
+      topics : filter.topics
+    }
+    provider.getLogs(filterLog).then((result) => {
+      console.log('result:::', result.length);
+      for (const res of result) {
+        const event = seaportContract.interface.parseLog(res);
+        if (event && event.name === this.eventOrdersMatched) {
+          const hashes = event.args['orderHashes'] as [];
+          for (const hash of hashes) {
+            this.handleOrderMatched(hash);
+          }
+        }
+      }
+    }).catch(console.error)
+
+    // let eventsWith = await seaportContract.queryFilter(filterLog);
+    // console.log(eventsWith);
     // const release = await this.mutexManager.acquireLock();
 
     // console.log(
