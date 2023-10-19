@@ -26,9 +26,14 @@ export class OrderController {
     return this.orderService.findAll(query);
   }
 
-  @Get(':hash')
+  @Get('/getOrderByHash/:hash')
   findOne(@Param('hash') hash: string) {
     return this.orderService.findOne(hash);
+  }
+
+  @Get('/remainingNft')
+  remainingNft() {
+    return this.orderService.findRemainingNft();
   }
 
   @Delete(':hash')

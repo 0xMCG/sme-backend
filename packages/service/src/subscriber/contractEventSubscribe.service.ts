@@ -9,6 +9,7 @@ import { OrderService } from '../order/order.service';
 import { OrderStatus } from '../order/types';
 import { BlockService } from '../block/block.service';
 import { MutexManager } from './MutexManager';
+import { TransactionService } from '../transaction/transaction.service';
 
 @Injectable()
 export class ContractEventSubscribeService
@@ -23,6 +24,7 @@ export class ContractEventSubscribeService
   constructor(
     private readonly etherProvider: EtherProvider,
     private readonly orderService: OrderService,
+    private readonly transactionService: TransactionService,
     private readonly mutexManager: MutexManager,
     private readonly blockService: BlockService,
   ) {
@@ -189,6 +191,7 @@ export class ContractEventSubscribeService
   }
 
   handleOrderMatched(orderHash: string) {
+    this.transactionService.updateTransactionStatus(orderHash, OrderStatus.MATCHED);
     this.orderService.updateOrderStatus(orderHash, OrderStatus.MATCHED);
   }
 

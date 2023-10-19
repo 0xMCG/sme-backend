@@ -23,4 +23,8 @@ export class MapContainer {
   size(): number {
     return this.globalMap.size;
   }
+
+  getFirstKey() {
+    return [...this.globalMap.keys()][0];
+  }
 }

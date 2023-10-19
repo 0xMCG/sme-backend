@@ -21,6 +21,7 @@ import { GlobalModule } from './global.module';
 import { TaskService } from './task/task.service';
 import { SmeWebsocketGatewayModule } from './websocket/sme.websocket.gateway.module';
 import { TaskSchema } from './task/schema/task.shema';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -54,7 +55,8 @@ import { TaskSchema } from './task/schema/task.shema';
     SystemModule,
     TaskModule,
     GlobalModule,
-    SmeWebsocketGatewayModule
+    SmeWebsocketGatewayModule,
+    TransactionModule
   ],
   controllers: [AppController],
   providers: [

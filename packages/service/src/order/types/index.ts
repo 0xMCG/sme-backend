@@ -70,7 +70,8 @@ class OrderEntry {
 
 export enum OrderType {
   BID = '1',
-  SELL = '2'
+  SELL = '2',
+  INITIAL = '3'
 }
 
 export { Offer, Consideration, OrderEntry };
@@ -79,6 +80,7 @@ export enum OrderStatus {
   CANCELLED = 'Cancelled',
   MATCHED = 'Matched',
   VALID = 'Valid',
+  PENDING = 'PENDING'
 }
 
 export enum TaskStatus {

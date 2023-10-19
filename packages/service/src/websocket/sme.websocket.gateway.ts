@@ -3,13 +3,17 @@ import { Server, Socket } from 'socket.io';
 import { TaskService } from '../task/task.service';
 import { MapContainer } from '../map.container';
 import { Injectable } from '@nestjs/common';
+import { TransactionService } from '../transaction/transaction.service';
+import { OrderStatus } from '../order/types';
 
 @WebSocketGateway()
 @Injectable()
 export class SmeWebsocketGateway {
 
   constructor(private readonly mapContainer: MapContainer,
-    private readonly taskService: TaskService) {}
+    private readonly taskService: TaskService,
+    private readonly transactionService: TransactionService,
+    ) {}
   
   @WebSocketServer()
   server: Server;
@@ -54,7 +58,10 @@ export class SmeWebsocketGateway {
     console.log('Received matched message:', payload);
     const receivedPayload = JSON.parse(payload);
     // 将收到的信息保存到数据库
+    for (const iterator of receivedPayload) {
+      iterator.status = OrderStatus.PENDING;
+      this.transactionService.create(iterator)
+    }
     return payload;
   }
-
 }

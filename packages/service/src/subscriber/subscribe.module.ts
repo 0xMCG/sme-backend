@@ -11,14 +11,19 @@ import { SeaportProvider } from '../lib/seaport.provider';
 import { BlockSchema } from '../block/schema/block.schema';
 import { BlockService } from '../block/block.service';
 import { MutexManager } from './MutexManager';
+import { TransactionModule } from '../transaction/transaction.module';
+import { TransactionSchema } from '../transaction/schema/transaction.schema';
+import { TransactionService } from '../transaction/transaction.service';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     OrderModule,
+    TransactionModule,
     MongooseModule.forFeature([
       { name: 'Order', schema: OrderSchema },
       { name: 'Block', schema: BlockSchema },
+      { name: 'Transaction', schema: TransactionSchema },
     ]),
   ],
   providers: [
@@ -28,6 +33,7 @@ import { MutexManager } from './MutexManager';
     SeaportProvider,
     BlockService,
     MutexManager,
+    TransactionService
   ],
   exports: [ContractEventSubscribeService, MutexManager],
 })

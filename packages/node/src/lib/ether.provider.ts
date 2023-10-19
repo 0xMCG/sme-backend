@@ -3,12 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { SeaportABIvVRF } from '../abi/Seaport_VRF';
 import { ERC721ABI } from '../abi/ERC721';
+import { SeaportABIvSME } from '../abi/Seaport_vSME_dual';
 
 @Injectable()
 export class EtherProvider {
   private readonly provider;
 
   private readonly contract;
+
+  private readonly vrfContract;
 
   private readonly erc721Contract;
 
@@ -31,6 +34,13 @@ export class EtherProvider {
       this.provider,
     );
 
+    this.vrfContract = new ethers.Contract(
+      // this.smeSeaportAddress,
+      '0xC619D985a88e341B618C23a543B8Efe2c55D1b37',
+      SeaportABIvVRF,
+      this.provider,
+    );
+
     this.erc721Contract = new ethers.Contract(
       this.erc721Address,
       ERC721ABI,
@@ -40,6 +50,10 @@ export class EtherProvider {
 
   getProvider() {
     return this.provider;
+  }
+
+  getVrfContract() {
+    return this.vrfContract;
   }
 
   getContract() {

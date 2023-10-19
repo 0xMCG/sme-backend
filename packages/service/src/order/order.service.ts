@@ -2,14 +2,14 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { SeaportProvider } from '../lib/seaport.provider';
-import { OrderQueryParams, OrderStatus } from './types';
+import { OrderQueryParams, OrderStatus, OrderType } from './types';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectModel('Order') private readonly orderModel,
     private readonly seaportProvider: SeaportProvider,
-  ) {}
+  ) { }
 
   async create(createOrderDto: CreateOrderDto) {
     // const hash = this.seaportProvider.getProvider().getOrderHash(createOrderDto.entry.parameters as OrderComponents);
@@ -39,12 +39,14 @@ export class OrderService {
 
   async findAll(query: OrderQueryParams) {
     const current_timestamp = new Date().getTime() / 1000;
-    const conditionQuery = {'entry.parameters.endTime': {
-      $gte: current_timestamp.toString(),
-    },
-    status: {
-      $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
-    }};
+    const conditionQuery = {
+      'entry.parameters.endTime': {
+        $gte: current_timestamp.toString(),
+      },
+      status: {
+        $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
+      }
+    };
 
     if (query.type) {
       conditionQuery['type'] = query.type;
@@ -57,6 +59,25 @@ export class OrderService {
     return await this.orderModel
       .find(conditionQuery)
       .exec();
+  }
+
+  async findRemainingNft() {
+    const current_timestamp = new Date().getTime() / 1000;
+    const conditionQuery = {
+      'entry.parameters.endTime': {
+        $gte: current_timestamp.toString(),
+      },
+      status: {
+        $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
+      },
+      type: OrderType.INITIAL
+    };
+
+    const result = await this.orderModel
+    .find(conditionQuery)
+    .exec();
+
+    return result?.length;
   }
 
   async findOne(hash: string) {
