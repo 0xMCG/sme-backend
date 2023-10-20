@@ -85,7 +85,7 @@ export class ContractEventSubscribeService {
     //                     randomWords
     //                   })
     //                 }
-    //                 console.log('this.mapContainer:::', this.mapContainer)
+    //                 console.log('', this.mapContainer)
     //                 console.log('Task publisher 推送消息')
     //                 this.taskPublisher.emitTaskEvent({
     //                   requestId,
@@ -141,8 +141,8 @@ export class ContractEventSubscribeService {
             ethers.BigNumber.from(e).toString(),
           );
           const requestId = event.args['requestId'].toString();
-          console.log('randomWords:::', randomWords);
-          console.log('requestId:::', requestId);
+          // console.log('randomWords:::', randomWords);
+          // console.log('requestId:::', requestId);
           if (firstRequestId === requestId) {
             const isExist = this.mapContainer.get(requestId);
             if (isExist) {
@@ -164,7 +164,7 @@ export class ContractEventSubscribeService {
             }
             this.mapContainer.delete(requestId);
           }
-          console.log('this.mapContainer:::', this.mapContainer);
+          // console.log('', this.mapContainer);
         }
       }
     }).catch(console.error)
@@ -222,7 +222,7 @@ export class ContractEventSubscribeService {
     //                 }
 
     //                 this.mapContainer.delete(requestId);
-    //                 console.log('this.mapContainer:::', this.mapContainer);
+    //                 console.log('', this.mapContainer);
     //                 // this.taskPublisher.emitTaskEvent({
     //                 //   requestId,
     //                 //   takerOrder: [],

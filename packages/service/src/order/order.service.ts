@@ -68,7 +68,7 @@ export class OrderService {
         $gte: current_timestamp.toString(),
       },
       status: {
-        $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
+        $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED, OrderStatus.PENDING],
       },
       type: OrderType.INITIAL
     };
@@ -78,6 +78,25 @@ export class OrderService {
     .exec();
 
     return result?.length;
+  }
+
+  async  findInitialMarkerOrder() {
+    const current_timestamp = new Date().getTime() / 1000;
+    const conditionQuery = {
+      'entry.parameters.endTime': {
+        $gte: current_timestamp.toString(),
+      },
+      status: {
+        $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED, OrderStatus.PENDING],
+      },
+      type: OrderType.INITIAL
+    };
+
+    const result = await this.orderModel
+    .findOne(conditionQuery)
+    .exec();
+
+    return result;
   }
 
   async findOne(hash: string) {

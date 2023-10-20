@@ -47,13 +47,17 @@ export class WebSocketClient {
       const value = task?.value;
       const contract = this.seaportProvider.getContract();
 
-      // value的数据格式是:
-      // randomNumberCount: number
-      // randomStrategy: number
-      // takerOrders: OrderEntry[];
-      // makerOrders: OrderEntry[];
-      // modeOrderFulfillments: MatchOrdersFulfillment[];
-      // this.mapContainer.set(key, value);
+      /**
+       * 
+       *
+       * value的数据格式是:
+          randomNumberCount: number
+          randomStrategy: number
+          takerOrders: OrderEntry[];
+          makerOrders: OrderEntry[];
+          modeOrderFulfillments: MatchOrdersFulfillment[];
+          this.mapContainer.set(key, value);
+       */
 
       const takerOrders = value.takerOrders;
       const makerOrders = value.makerOrders;
@@ -61,11 +65,10 @@ export class WebSocketClient {
       const modeOrderFulfillments = value.modeOrderFulfillments;
       const randomNumberCount = value.randomNumberCount;
 
-
       // const [takerOrder, makerOrder, makerOrder2] = await this.seaportProvider.build_bid_scenario();
       // const takerOrders = [takerOrder];
       // const makerOrders = [makerOrder, makerOrder2];
-      // const randomStrategy = 0;
+      // const randomStrategy = 1;
       // const randomNumberCount = 2;
       // const modeOrderFulfillments: MatchOrdersFulfillment[] = [];
       // modeOrderFulfillments.push({
@@ -131,17 +134,6 @@ export class WebSocketClient {
       // console.log('makerOrder2:', JSON.stringify(makerOrder2))
 
       try {
-        // const result = await contract
-        //   .prepare(
-        //     [makerOrder, makerOrder2, takerOrder],
-        //     // premiumOrder在前面数组的下标
-        //     [],
-        //     [],
-        //     // 2个随机数
-        //     2,
-        //     { gasLimit: 1000000 },
-        //   )
-
         const result = await contract.prepare(
           [...makerOrders, ...takerOrders],
           // premiumOrder在前面数组的下标
@@ -203,7 +195,10 @@ export class WebSocketClient {
               this.sendPrepareMessage(
                 JSON.stringify({
                   key,
-                  value: requestId,
+                  value: {
+                    status: true,
+                    data: requestId
+                  }
                 }),
               );
             }
@@ -212,7 +207,10 @@ export class WebSocketClient {
           this.sendPrepareMessage(
             JSON.stringify({
               key,
-              value: 'Send tx failed',
+              value: {
+                status: false,
+                data: 'Send tx failed'
+              }
             }),
           );
         }
@@ -263,7 +261,10 @@ export class WebSocketClient {
         this.sendPrepareMessage(
           JSON.stringify({
             key,
-            value: error.message,
+            value: {
+              status: false,
+              data: error.message
+            },
           }),
         );
       } finally {

@@ -4,6 +4,8 @@ import { FillOrderDto } from './dto/fill-order.dto';
 import { SmeWebsocketGateway } from 'src/websocket/sme.websocket.gateway';
 import * as crypto from 'crypto';
 import { MapContainer } from '../map.container';
+import { OrderService } from 'src/order/order.service';
+import { OrderStatus } from 'src/order/types';
 
 function sleep(ms: any) {
   return new Promise((resolve) => {
@@ -14,6 +16,7 @@ function sleep(ms: any) {
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService, 
+    private readonly orderService: OrderService,
     @Inject(SmeWebsocketGateway) private readonly smeWebsocketGateway: SmeWebsocketGateway,
     private readonly mapContainer: MapContainer) {}
 
@@ -28,12 +31,27 @@ export class TaskController {
   }
 
   @Post('/fillOrder')
-  async fillOrder(@Body() fillOrderDto: FillOrderDto): Promise<string> {
+  async fillOrder(@Body() fillOrderDto: FillOrderDto): Promise<any> {
     // 假设请求参数是某个对象，将对象序列化成一个字符串key，重新将请求参数封装成key-value的形式发送给node
     let result = null;
     // const message = {
     //   // message: new Date().getTime()
     // };
+    if (!fillOrderDto.makerOrders || fillOrderDto.makerOrders.length === 0) {
+      console.log('maker为空')
+      // maker为空 从数据库中随机挑选一个初始化的marker
+      const initialMaker = await this.orderService.findInitialMarkerOrder();
+      console.log('initialMaker::', initialMaker)
+      if (initialMaker) {
+        await this.orderService.updateOrderStatus(initialMaker.hash, OrderStatus.PENDING);
+        fillOrderDto.makerOrders = [initialMaker];
+      } else {
+        return {
+          status: false,
+          data: 'No nft remaining'
+        }
+      }
+    }
     const message = fillOrderDto;
     const jsonString = JSON.stringify(message);
     const md5Hash = crypto.createHash('md5').update(jsonString).digest('hex');
@@ -48,8 +66,9 @@ export class TaskController {
       if (result !== undefined) break;
       await sleep(6000);
     }
-    await this.taskService.create(result);
-
+    if (result && result.status) {
+      await this.taskService.create(result.data);
+    }
     return result;
   }
 
