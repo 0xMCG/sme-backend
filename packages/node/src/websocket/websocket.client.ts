@@ -47,6 +47,10 @@ export class WebSocketClient {
       const value = task?.value;
       const contract = this.seaportProvider.getContract();
 
+      const seaport = this.seaportProvider.getSeaport();
+
+      const orderHashes = [];
+
       /**
        * 
        *
@@ -59,79 +63,91 @@ export class WebSocketClient {
           this.mapContainer.set(key, value);
        */
 
-      const takerOrders = value.takerOrders;
-      const makerOrders = value.makerOrders;
-      const randomStrategy = value.randomStrategy;
-      const modeOrderFulfillments = value.modeOrderFulfillments;
-      const randomNumberCount = value.randomNumberCount;
+      // const takerOrders = value.takerOrders;
+      // const makerOrders = value.makerOrders;
+      // const randomStrategy = value.randomStrategy;
+      // const modeOrderFulfillments = value.modeOrderFulfillments;
+      // const randomNumberCount = value.randomNumberCount;
 
-      // const [takerOrder, makerOrder, makerOrder2] = await this.seaportProvider.build_bid_scenario();
-      // const takerOrders = [takerOrder];
-      // const makerOrders = [makerOrder, makerOrder2];
-      // const randomStrategy = 1;
-      // const randomNumberCount = 2;
-      // const modeOrderFulfillments: MatchOrdersFulfillment[] = [];
-      // modeOrderFulfillments.push({
-      //   offerComponents: [
-      //     {
-      //       orderIndex: 0,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      //   considerationComponents: [
-      //     {
-      //       orderIndex: 2,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      // });
-      // modeOrderFulfillments.push({
-      //   offerComponents: [
-      //     {
-      //       orderIndex: 2,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      //   considerationComponents: [
-      //     {
-      //       orderIndex: 0,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      // });
+      const [takerOrder, makerOrder, makerOrder2] = await this.seaportProvider.build_bid_scenario();
+      const takerOrders = [takerOrder];
+      const makerOrders = [makerOrder, makerOrder2];
+      const randomStrategy = 1;
+      const randomNumberCount = 2;
+      const modeOrderFulfillments: MatchOrdersFulfillment[] = [];
+      modeOrderFulfillments.push({
+        offerComponents: [
+          {
+            orderIndex: 0,
+            itemIndex: 0,
+          },
+        ],
+        considerationComponents: [
+          {
+            orderIndex: 2,
+            itemIndex: 0,
+          },
+        ],
+      });
+      modeOrderFulfillments.push({
+        offerComponents: [
+          {
+            orderIndex: 2,
+            itemIndex: 0,
+          },
+        ],
+        considerationComponents: [
+          {
+            orderIndex: 0,
+            itemIndex: 0,
+          },
+        ],
+      });
 
-      // modeOrderFulfillments.push({
-      //   offerComponents: [
-      //     {
-      //       orderIndex: 1,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      //   considerationComponents: [
-      //     {
-      //       orderIndex: 2,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      // });
-      // modeOrderFulfillments.push({
-      //   offerComponents: [
-      //     {
-      //       orderIndex: 2,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      //   considerationComponents: [
-      //     {
-      //       orderIndex: 1,
-      //       itemIndex: 0,
-      //     },
-      //   ],
-      // });
+      modeOrderFulfillments.push({
+        offerComponents: [
+          {
+            orderIndex: 1,
+            itemIndex: 0,
+          },
+        ],
+        considerationComponents: [
+          {
+            orderIndex: 2,
+            itemIndex: 0,
+          },
+        ],
+      });
+      modeOrderFulfillments.push({
+        offerComponents: [
+          {
+            orderIndex: 2,
+            itemIndex: 0,
+          },
+        ],
+        considerationComponents: [
+          {
+            orderIndex: 1,
+            itemIndex: 0,
+          },
+        ],
+      });
 
       // console.log('takerOrder:', JSON.stringify(takerOrder))
       // console.log('makerOrder:', JSON.stringify(makerOrder))
       // console.log('makerOrder2:', JSON.stringify(makerOrder2))
+
+      if (takerOrders && takerOrders.length) {
+        for (const takerOrder of takerOrders) {
+          orderHashes.push(seaport.getOrderHash(takerOrder.parameters))
+        }
+      }
+
+      if (makerOrders && makerOrders.length) {
+        for (const makerOrder of makerOrders) {
+          orderHashes.push(seaport.getOrderHash(makerOrder.parameters))
+        }
+      }
 
       try {
         const result = await contract.prepare(
@@ -150,8 +166,8 @@ export class WebSocketClient {
 
         let retryCount = 0;
 
-        while (receipt === null && retryCount < 20) {
-          console.log('123');
+        while (result.hash && receipt === null && retryCount < 20) {
+          console.log('123 retryCount: ', retryCount);
           retryCount++;
           receipt = await this.etherProvider
             .getProvider()
@@ -197,7 +213,10 @@ export class WebSocketClient {
                   key,
                   value: {
                     status: true,
-                    data: requestId
+                    data: {
+                      requestId,
+                      orderHashes
+                    }
                   }
                 }),
               );

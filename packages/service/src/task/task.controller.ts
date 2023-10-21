@@ -54,7 +54,7 @@ export class TaskController {
     }
     const message = fillOrderDto;
     const jsonString = JSON.stringify(message);
-    const md5Hash = crypto.createHash('md5').update(jsonString).digest('hex');
+    const md5Hash = crypto.createHash('md5').update(jsonString + new Date().getTime()).digest('hex');
     this.smeWebsocketGateway.sendTask1ToAllClients(JSON.stringify({
       key: md5Hash,
       value: message
@@ -69,6 +69,7 @@ export class TaskController {
     if (result && result.status) {
       await this.taskService.create(result.data);
     }
+    this.mapContainer.delete(md5Hash);
     return result;
   }
 

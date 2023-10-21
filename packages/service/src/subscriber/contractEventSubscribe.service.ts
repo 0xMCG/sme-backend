@@ -6,13 +6,14 @@ import {
 import { EtherProvider } from '../lib/ether.provider';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OrderService } from '../order/order.service';
-import { OrderEntry, OrderStatus, OrderType } from '../order/types';
+import { OrderEntry, OrderStatus, OrderType, TaskStatus } from '../order/types';
 import { BlockService } from '../block/block.service';
 import { MutexManager } from './MutexManager';
 import { TransactionService } from '../transaction/transaction.service';
 import { ethers } from 'ethers';
 import { Seaport } from '@opensea/seaport-js';
 import { CreateOrderDto } from '../order/dto/create-order.dto';
+import { TaskService } from '../task/task.service';
 
 const testERC20Address = "0x8D4E2c8bc6b1E4Fa0ED829E6786E9096dd6DC265"
 const testERC20Address2 = "0x6c877a0f432feaab6052d8cc4ae2cf3d686d589f"
@@ -33,6 +34,7 @@ export class ContractEventSubscribeService
     private readonly transactionService: TransactionService,
     private readonly mutexManager: MutexManager,
     private readonly blockService: BlockService,
+    private readonly taskService: TaskService,
   ) {
     this.blockNumber = 0;
 
@@ -50,15 +52,15 @@ export class ContractEventSubscribeService
   }
 
   async onModuleInit() {
-    const block = await this.blockService.findOne();
-    if (!block) {
-      const result = await this.blockService.create(4092331);
-      this._blockDBId = result._id;
-      this.blockNumber = result.last;
-    } else {
-      this.blockNumber = block.last;
-      this._blockDBId = block._id;
-    }
+    // const block = await this.blockService.findOne();
+    // if (!block) {
+    //   const result = await this.blockService.create(4092331);
+    //   this._blockDBId = result._id;
+    //   this.blockNumber = result.last;
+    // } else {
+    //   this.blockNumber = block.last;
+    //   this._blockDBId = block._id;
+    // }
     // this.etherProvider
     //   .getContract()
     //   .on('OrderCancelled', (event) => {
@@ -71,17 +73,21 @@ export class ContractEventSubscribeService
 
   @Cron(CronExpression.EVERY_MINUTE) // Cron expression (e.g., every hour)
   async handleHistoryBlockCron() {
+    const release = await this.mutexManager.acquireLock();
+
     const seaportContract = this.etherProvider.getSeaportContract();
     const provider = this.etherProvider.getProvider();
 
-    let filter = seaportContract.filters.OrdersMatched();
-    let filterLog = {
+    let filterOrderMatched = seaportContract.filters.OrdersMatched();
+    let filterMatchSuccessOrNot = seaportContract.filters.MatchSuccessOrNot();
+    let filterOrderMatchedLog = {
       fromBlock : 0,
       toBlock : 'latest',
-      topics : filter.topics
+      topics : filterOrderMatched.topics
     }
-    provider.getLogs(filterLog).then((result) => {
-      console.log('result:::', result.length);
+    
+    provider.getLogs(filterOrderMatchedLog).then((result) => {
+      console.log('Order Matched result:::', result.length);
       for (const res of result) {
         const event = seaportContract.interface.parseLog(res);
         if (event && event.name === this.eventOrdersMatched) {
@@ -94,121 +100,39 @@ export class ContractEventSubscribeService
       }
     }).catch(console.error)
 
-    // let eventsWith = await seaportContract.queryFilter(filterLog);
-    // console.log(eventsWith);
-    // const release = await this.mutexManager.acquireLock();
-
-    // console.log(
-    //   'Running get history block cron job every 10 seconds, current block: ',
-    //   this.blockNumber,
-    // );
-
-    // // Task logic to be executed on schedule
-    // this.etherProvider
-    //   .getProvider()
-    //   .getBlockWithTransactions(this.blockNumber)
-    //   .then((block) => {
-    //     this.blockNumber++;
-    //     release();
-    //     const transactions = block.transactions;
-    //     transactions.forEach((tx) => {
-    //       tx.wait()
-    //         .then((receipt) => {
-    //           // parse log
-    //           for (const log of receipt.logs || []) {
-    //             if (log.address != this.etherProvider.getContract().address) {
-    //               continue;
-    //             }
-    //             const event = this.etherProvider
-    //               .getContract()
-    //               .interface.parseLog(log);
-    //             if (event && event.name === this.eventOrdersMatched) {
-    //               const hashes = event.args['orderHashes'] as [];
-    //               for (const hash of hashes) {
-    //                 this.handleOrderMatched(hash);
-    //               }
-    //             }
-    //             if (event && event.name === this.eventOrdersCancelled) {
-    //               // TODO: Get cancelled event args
-    //               console.log('event.args', event.args);
-    //             }
-    //           }
-    //         })
-    //         .catch((_) => {
-    //           // console.error('Get transaction data error');
-    //           release();
-    //         });
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     console.error('Get block error:', this.blockNumber, error);
-    //     --this.blockNumber;
-    //     release();
-    //     this.blockService.update(this._blockDBId, this.blockNumber);
-    //   });
+    let filterMatchSuccessOrNotLog = {
+      fromBlock : 0,
+      toBlock : 'latest',
+      topics : filterMatchSuccessOrNot.topics
+    }
+    provider.getLogs(filterMatchSuccessOrNotLog).then((result) => {
+      // console.log('result:::', result);
+      for (const res of result) {
+        const event = seaportContract.interface.parseLog(res);
+        if (event && event.name === 'MatchSuccessOrNot') {
+          // console.log('event::', event)
+          const requestId = event.args['requestId']?.toString();;
+          const isSuccess = event.args['isSuccess'];
+          console.log('requestId:::', requestId);
+          console.log('isSuccess:::', isSuccess);
+          this.handleMatchSuccessOrNot(requestId, isSuccess);
+        }
+      }
+    }).catch(console.error)
+    release();
   }
 
   // @Cron(CronExpression.EVERY_10_SECONDS)
   async handleLastBlockCron() {
     const release = await this.mutexManager.acquireLock();
-
     const markerOrder = await this.build_maker_order_for_bid();
-
     console.log('markerOrder::::', markerOrder);
-
     let entry2Save: CreateOrderDto = new CreateOrderDto();
     entry2Save.hash = markerOrder.hash;
     entry2Save.entry = markerOrder.order as unknown as OrderEntry;
     entry2Save.type = OrderType.INITIAL;
-
     this.orderService.create(entry2Save);
-
     release();
-    // const lastBlockNumber = await this.etherProvider
-    //   .getProvider()
-    //   .getBlockNumber();
-
-    // console.log('Get last block cron, last block number', lastBlockNumber);
-    // this.etherProvider
-    //   .getProvider()
-    //   .getBlockWithTransactions(lastBlockNumber)
-    //   .then((block) => {
-    //     const transactions = block.transactions;
-    //     transactions.forEach((tx) => {
-    //       tx.wait()
-    //         .then((receipt) => {
-    //           // parse log
-    //           for (const log of receipt.logs || []) {
-    //             if (log.address != this.etherProvider.getContract().address) {
-    //               continue;
-    //             }
-    //             const event = this.etherProvider
-    //               .getContract()
-    //               .interface.parseLog(log);
-    //             if (event && event.name === this.eventOrdersMatched) {
-    //               const hashes = event.args['orderHashes'] as [];
-    //               for (const hash of hashes) {
-    //                 this.handleOrderMatched(hash);
-    //               }
-    //             }
-    //             if (event && event.name === this.eventOrdersCancelled) {
-    //               // TODO: Get cancelled event args
-    //               console.log('event.args', event.args);
-    //             }
-    //           }
-    //         })
-    //         .catch((_) => {
-    //           // console.error('Get transaction data error');
-    //         });
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     console.error(
-    //       'Get last block cron, get block error:',
-    //       this.blockNumber,
-    //       error,
-    //     );
-    //   });
   }
 
   handleOrderMatched(orderHash: string) {
@@ -218,6 +142,36 @@ export class ContractEventSubscribeService
 
   handleOrderCancelled(orderHash: string) {
     this.orderService.updateOrderStatus(orderHash, OrderStatus.CANCELLED);
+  }
+
+  handleOrderFailed(orderHash: string) {
+    this.orderService.updateOrderStatus(orderHash, OrderStatus.FAILED);
+  }
+
+  async handleMatchSuccessOrNot(requestId: string, isSuccess: boolean) {
+    const ifExited = await this.taskService.findOne(requestId);
+    console.log('ifExited:::', ifExited)
+    if (ifExited) {
+      if (isSuccess) {
+        // 1. 将requestId对应的task更新为成功
+        this.taskService.update(ifExited.requestId, TaskStatus.MATCHED);
+        // 2. 从task中找到requestId对应的hashes更新为成功状态
+        if (ifExited.orderHashes && ifExited.orderHashes.length) {
+          for (const hash of ifExited.orderHashes) {
+            this.handleOrderMatched(hash)
+          }
+        }
+      } else {
+        // 3. 将requestId对应的task更新为失败
+        this.taskService.update(ifExited.requestId, TaskStatus.FAILED);
+        // 4. 从task中找到requestId对应的hashes更新为失败状态
+        if (ifExited.orderHashes && ifExited.orderHashes.length) {
+          for (const hash of ifExited.orderHashes) {
+            this.handleOrderFailed(hash)
+          }
+        }
+      }
+    }
   }
 
   async build_maker_order_for_bid() {
@@ -230,7 +184,7 @@ export class ContractEventSubscribeService
     const Signer = new ethers.Wallet('f4ca61bd2d1de03ecc52eeba0d28fda8eccf990692254de9811d538e0bdb0bdb', this.etherProvider.getProvider());
 
     const seaport = new Seaport(Signer, {
-      overrides: { contractAddress: '0xd3B2C0B21D63e8b9701c0daFFaADf3d05A642415' },
+      overrides: { contractAddress: '0xA8106e7c77A535e58851B8B94498d94F777469Bb' },
       conduitKeyToConduit: CONDUIT_KEYS_TO_CONDUIT,
     });
     const offerer = '0x28c73A60ccF8c66c14EbA8935984e616Df2926e3';

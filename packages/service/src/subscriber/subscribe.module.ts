@@ -14,15 +14,20 @@ import { MutexManager } from './MutexManager';
 import { TransactionModule } from '../transaction/transaction.module';
 import { TransactionSchema } from '../transaction/schema/transaction.schema';
 import { TransactionService } from '../transaction/transaction.service';
+import { TaskSchema } from '../task/schema/task.shema';
+import { TaskModule } from '../task/task.module';
+import { TaskService } from '../task/task.service';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     OrderModule,
     TransactionModule,
+    TaskModule,
     MongooseModule.forFeature([
       { name: 'Order', schema: OrderSchema },
       { name: 'Block', schema: BlockSchema },
+      { name: 'Task', schema: TaskSchema },
       { name: 'Transaction', schema: TransactionSchema },
     ]),
   ],
@@ -33,7 +38,8 @@ import { TransactionService } from '../transaction/transaction.service';
     SeaportProvider,
     BlockService,
     MutexManager,
-    TransactionService
+    TransactionService,
+    TaskService
   ],
   exports: [ContractEventSubscribeService, MutexManager],
 })

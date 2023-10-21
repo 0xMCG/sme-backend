@@ -24,7 +24,7 @@ export class EtherProvider {
       this.configService.get('RPC_PROVIDER'),
     );
 
-    this.smeSeaportAddress = '0xd3B2C0B21D63e8b9701c0daFFaADf3d05A642415';
+    this.smeSeaportAddress = '0xA8106e7c77A535e58851B8B94498d94F777469Bb';
     this.erc721Address = '0xE4E39D40d1b9c70dcd115FEA8DaEF242194f2cC7';
 
     this.contract = new ethers.Contract(

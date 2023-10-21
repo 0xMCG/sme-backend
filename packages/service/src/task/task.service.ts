@@ -15,9 +15,10 @@ export class TaskService {
     return this.taskModel.findOne({requestId}).exec();;
   }
 
-  async create(requestId: string) {
+  async create(data: { requestId: string, orderHashes: string[] }) {
     const model = new this.taskModel({
-      requestId,
+      requestId: data.requestId,
+      orderHashes: data.orderHashes,
       status: TaskStatus.REQUESTED
     });
 

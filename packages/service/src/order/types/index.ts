@@ -80,13 +80,15 @@ export enum OrderStatus {
   CANCELLED = 'Cancelled',
   MATCHED = 'Matched',
   VALID = 'Valid',
-  PENDING = 'PENDING'
+  PENDING = 'PENDING',
+  FAILED = 'failed'
 }
 
 export enum TaskStatus {
   REQUESTED = 'requested random number',
   PENDING = 'pending',
   MATCHED = 'matched',
+  FAILED = 'failed'
 }
 
 export class OrderQueryParams {

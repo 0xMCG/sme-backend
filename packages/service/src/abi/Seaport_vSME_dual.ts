@@ -745,6 +745,23 @@ const SeaportABIvSME = [
     anonymous: false,
     inputs: [
       {
+        internalType: 'uint256',
+        name: 'requestId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'bool',
+        name: 'isSuccess',
+        type: 'bool',
+      },
+    ],
+    name: "MatchSuccessOrNot",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: "address",
         name: "previousOwner",
