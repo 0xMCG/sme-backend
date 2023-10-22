@@ -44,7 +44,7 @@ export class TaskController {
       console.log('initialMaker::', initialMaker)
       if (initialMaker) {
         await this.orderService.updateOrderStatus(initialMaker.hash, OrderStatus.PENDING);
-        fillOrderDto.makerOrders = [initialMaker];
+        fillOrderDto.makerOrders = [initialMaker.entry];
       } else {
         return {
           status: false,

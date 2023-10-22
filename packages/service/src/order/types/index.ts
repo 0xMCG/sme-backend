@@ -80,8 +80,8 @@ export enum OrderStatus {
   CANCELLED = 'Cancelled',
   MATCHED = 'Matched',
   VALID = 'Valid',
-  PENDING = 'PENDING',
-  FAILED = 'failed'
+  PENDING = 'Pending',
+  FAILED = 'Failed'
 }
 
 export enum TaskStatus {
