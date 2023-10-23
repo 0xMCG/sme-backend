@@ -1,5 +1,26 @@
 import * as mongoose from 'mongoose';
 
+const offerItemSchema = new mongoose.Schema({
+  
+    itemType: Number,
+    token: String,
+    identifierOrCriteria: String,
+    startAmount: String,
+    endAmount: String,
+  
+}, { _id: false }); // 禁用嵌套模式的 _id 字段
+
+const considerationItemSchema = new mongoose.Schema({
+  
+    itemType: Number,
+    token: String,
+    identifierOrCriteria: String,
+    startAmount: String,
+    endAmount: String,
+    recipient: String,
+  
+}, { _id: false }); // 禁用嵌套模式的 _id 字段
+
 export const OrderSchema = new mongoose.Schema({
   hash: String,
   entry: {
@@ -11,23 +32,10 @@ export const OrderSchema = new mongoose.Schema({
       endTime: String,
       orderType: Number,
       offer: [
-        {
-          itemType: Number,
-          token: String,
-          identifierOrCriteria: String,
-          startAmount: String,
-          endAmount: String,
-        },
+        offerItemSchema
       ],
       consideration: [
-        {
-          itemType: Number,
-          token: String,
-          identifierOrCriteria: String,
-          startAmount: String,
-          endAmount: String,
-          recipient: String,
-        },
+        considerationItemSchema
       ],
       totalOriginalConsiderationItems: Number,
       salt: String,

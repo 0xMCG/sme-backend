@@ -8,6 +8,7 @@ import {
 import { EtherProvider } from '../lib/ether.provider';
 import { TaskPublisher } from '../task/task.publisher';
 import { MatchOrdersFulfillment } from '@opensea/seaport-js/lib/types';
+import * as moment from 'moment';
 
 function sleep(ms: any) {
   return new Promise((resolve) => {
@@ -40,7 +41,7 @@ export class WebSocketClient {
     });
 
     this.client.on('task1', async (message) => {
-      console.log('Received message:', message);
+      console.log('Received message:', moment().format('YYYY-MM-DD HH:mm:ss'), message);
 
       const task = JSON.parse(message);
       const key = task?.key;

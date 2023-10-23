@@ -131,6 +131,8 @@ export class ContractEventSubscribeService
     entry2Save.hash = markerOrder.hash;
     entry2Save.entry = markerOrder.order as unknown as OrderEntry;
     entry2Save.type = OrderType.INITIAL;
+
+    console.log("````````````````````````",JSON.stringify(entry2Save))
     this.orderService.create(entry2Save);
     release();
   }
@@ -195,19 +197,21 @@ export class ContractEventSubscribeService
           '0x28c73a60ccf8c66c14eba8935984e616df2926e3aaaaaaaaaaaaaaaaaaaaaa00',
         startTime: Math.floor(new Date().getTime() / 1000 - 60 * 60).toString(),
         endTime: Math.floor(new Date().getTime() / 1000 + 60 * 60 * 24 * 7).toString(),
-        offer: [
-          {
-            amount: ethers.utils.parseEther('0.002').toString(),
-            token: testERC20Address2,
-            endAmount: ethers.utils.parseEther('0.004').toString(),
-          },
-        ],
         consideration: [
           {
-            amount: ethers.utils.parseEther('0.00002').toString(),
-            token: testERC20Address,
-            endAmount: ethers.utils.parseEther('0.00002').toString(),
+            itemType: 3,
+            amount: '1',
+            token: "0x560B65205dEA9E14bB169c91650915503c41928C",
+            endAmount: '1',
+            identifier: '0',
             recipient: offerer,
+          },
+        ],
+        offer: [
+          {
+            amount: ethers.utils.parseEther('1').toString(),
+            token: "0x8D4E2c8bc6b1E4Fa0ED829E6786E9096dd6DC265",
+            endAmount: ethers.utils.parseEther('100').toString()
           },
         ],
       },

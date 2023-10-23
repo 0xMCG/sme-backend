@@ -37,14 +37,16 @@ export class TaskController {
     // const message = {
     //   // message: new Date().getTime()
     // };
+    let scratchHash = null;
     if (!fillOrderDto.makerOrders || fillOrderDto.makerOrders.length === 0) {
       console.log('maker为空')
       // maker为空 从数据库中随机挑选一个初始化的marker
       const initialMaker = await this.orderService.findInitialMarkerOrder();
-      console.log('initialMaker::', initialMaker)
+      // console.log('initialMaker::', initialMaker)
       if (initialMaker) {
-        await this.orderService.updateOrderStatus(initialMaker.hash, OrderStatus.PENDING);
         fillOrderDto.makerOrders = [initialMaker.entry];
+        scratchHash = initialMaker.hash;
+        await this.orderService.updateOrderStatus(initialMaker.hash, OrderStatus.PENDING);
       } else {
         return {
           status: false,
@@ -68,6 +70,10 @@ export class TaskController {
     }
     if (result && result.status) {
       await this.taskService.create(result.data);
+    } else {
+      if (scratchHash) {
+        await this.orderService.updateOrderStatus(scratchHash, OrderStatus.VALID);
+      }
     }
     this.mapContainer.delete(md5Hash);
     return result;
