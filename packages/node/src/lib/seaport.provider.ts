@@ -12,7 +12,7 @@ export const CONDUIT_KEYS_TO_CONDUIT = {
     '0x0681bc8f138ca32ed7725b91e8d11cfb6e10eb5f',
 };
 
-const smeSeaportAddress = '0xA8106e7c77A535e58851B8B94498d94F777469Bb';
+const smeSeaportAddress = '0xDe215cECCb5707Cad33a9500Cede0C585A42FDA2';
 
 const testERC20Address2 = '0x6c877a0f432feaab6052d8cc4ae2cf3d686d589f';
 const testERC20Address = '0x8D4E2c8bc6b1E4Fa0ED829E6786E9096dd6DC265';

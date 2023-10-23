@@ -184,7 +184,7 @@ export class ContractEventSubscribeService
     const Signer = new ethers.Wallet('f4ca61bd2d1de03ecc52eeba0d28fda8eccf990692254de9811d538e0bdb0bdb', this.etherProvider.getProvider());
 
     const seaport = new Seaport(Signer, {
-      overrides: { contractAddress: '0xA8106e7c77A535e58851B8B94498d94F777469Bb' },
+      overrides: { contractAddress: '0xDe215cECCb5707Cad33a9500Cede0C585A42FDA2' },
       conduitKeyToConduit: CONDUIT_KEYS_TO_CONDUIT,
     });
     const offerer = '0x28c73A60ccF8c66c14EbA8935984e616Df2926e3';
