@@ -45,11 +45,13 @@ export class OrderService {
       },
       status: {
         $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
-      }
+      },
     };
 
     if (query.type) {
       conditionQuery['type'] = query.type;
+    } else {
+      conditionQuery['type'] = { $ne: OrderType.INITIAL }
     }
 
     if (query.offerer) {
