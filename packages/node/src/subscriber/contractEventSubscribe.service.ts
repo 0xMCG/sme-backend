@@ -7,6 +7,8 @@ import { SeaportProvider } from '../lib/seaport.provider';
 import { TaskPublisher } from '../task/task.publisher';
 import { MapContainer } from '../map.container';
 import { ethers } from 'ethers';
+import { sleep, WebSocketClient } from '../websocket/websocket.client';
+import { TaskContainer } from '../task.container';
 
 @Injectable()
 export class ContractEventSubscribeService {
@@ -16,11 +18,14 @@ export class ContractEventSubscribeService {
   static instance: any;
 
   constructor(
+    private readonly seaportProvider: SeaportProvider,
     private readonly etherProvider: EtherProvider,
     private readonly mutexManager: MutexManager,
     private configService: ConfigService,
     private readonly mapContainer: MapContainer,
     private readonly taskPublisher: TaskPublisher,
+    private readonly webSocketClient: WebSocketClient,
+    private readonly taskContainer: TaskContainer,
   ) {
     if (ContractEventSubscribeService.instance) {
       return ContractEventSubscribeService.instance;
@@ -164,90 +169,171 @@ export class ContractEventSubscribeService {
             }
             this.mapContainer.delete(requestId);
           }
-          // console.log('', this.mapContainer);
         }
       }
     }).catch(console.error)
-
-    // const lastBlockNumber = await this.etherProvider
-    //   .getProvider()
-    //   .getBlockNumber();
-    // console.log('Get last block cron, last block number', lastBlockNumber);
-    // this.etherProvider
-    //   .getProvider()
-    //   .getBlockWithTransactions(lastBlockNumber)
-    //   .then((block) => {
-    //     release();
-    //     const transactions = block.transactions;
-    //     transactions.forEach((tx) => {
-    //       tx.wait()
-    //         .then((receipt) => {
-    //           // parse log
-    //           for (const log of receipt.logs || []) {
-    //             if (
-    //               log.address != '0xC619D985a88e341B618C23a543B8Efe2c55D1b37'
-    //             ) {
-    //               continue;
-    //             }
-    //             try {
-    //               const event = this.etherProvider
-    //                 .getContract()
-    //                 .interface.parseLog(log);
-
-    //               if (event && event.name === 'ReturnedRandomness') {
-    //                 const randomWords = event.args['randomWords'].map((e) =>
-    //                   ethers.BigNumber.from(e).toString(),
-    //                 );
-    //                 const requestId = event.args['requestId'].toString();
-    //                 console.log('randomWords:::', randomWords);
-    //                 console.log('requestId:::', requestId);
-
-    //                 const isExist = this.mapContainer.get(requestId);
-    //                 if (isExist) {
-    //                   isExist.randomWords = randomWords;
-    //                   this.mapContainer.set(requestId, isExist);
-    //                   this.taskPublisher.emitTaskEvent({
-    //                     requestId,
-    //                     takerOrder: isExist.takerOrders,
-    //                     makerOrder: isExist.makerOrders,
-    //                     randomStrategy: isExist.randomStrategy,
-    //                     premiumOrder: [],
-    //                     randomWords: randomWords,
-    //                     modeOrderFulfillments: isExist.modeOrderFulfillments,
-    //                   });
-    //                 } else {
-    //                   this.mapContainer.set(requestId, {
-    //                     randomWords,
-    //                   });
-    //                 }
-
-    //                 this.mapContainer.delete(requestId);
-    //                 console.log('', this.mapContainer);
-    //                 // this.taskPublisher.emitTaskEvent({
-    //                 //   requestId,
-    //                 //   takerOrder: [],
-    //                 //   makerOrder: [],
-    //                 //   premiumOrder: [],
-    //                 //   randomWords: randomWords
-    //                 // })
-    //               }
-    //             } catch (error) {
-    //               console.log('get receipt error ::::', error.message);
-    //             }
-    //           }
-    //         })
-    //         .catch((error) => {
-    //           // console.error('Get transaction data error', error.message);
-    //         });
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     release();
-    //     console.error(
-    //       'Get last block cron, get block error:',
-    //       this.blockNumber,
-    //       error,
-    //     );
-    //   });
   }
+
+  // 每30秒从集合里拿对应的订单执行prepare交易
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async handleTask() {
+    console.log('this.taskContainer.size():::', this.taskContainer.size())
+    if (this.taskContainer.size() === 0) return;
+    const release = await this.mutexManager.acquireLock();
+    const key = this.taskContainer.getFirstKey();
+
+    const { makerOrders, takerOrders, randomNumberCount, randomStrategy, modeOrderFulfillments, orderHashes } = this.taskContainer.get(key)
+    const contract = this.seaportProvider.getContract();
+
+    try {
+      const result = await contract.prepare(
+        [...makerOrders, ...takerOrders],
+        // premiumOrder在前面数组的下标
+        [],
+        [],
+        // 2个随机数
+        randomNumberCount,
+        { gasLimit: 1000000 },
+      );
+
+      console.log('result.hash:::', result.hash);
+
+      let receipt = null;
+
+      let retryCount = 0;
+
+      while (result.hash && receipt === null && retryCount < 20) {
+        console.log('123 retryCount: ', retryCount);
+        retryCount++;
+        receipt = await this.etherProvider
+          .getProvider()
+          .getTransactionReceipt(result.hash);
+        await sleep(6000); // 等待6秒后继续检查交易确认
+      }
+
+      console.log('receipt:::', receipt);
+
+      if (receipt && receipt.status) {
+        for (const log of receipt.logs || []) {
+          if (log.address != '0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625') {
+            continue;
+          }
+          const event = this.seaportProvider
+            .getTestContract()
+            .interface.parseLog(log);
+          if (event && event.name === 'RandomWordsRequested') {
+            const requestId = event.args['requestId']?.toString();
+            console.log('requestId:::', requestId);
+            // this.taskPublisher.emitTaskEvent({
+            //   requestId: "",
+            //   takerOrder: [],
+            //   makerOrder: [],
+            //   premiumOrder: [],
+            //   randomNumber: randomWords
+            // })
+            // this.mapContainer.set(requestId, {
+            //   makerOrders: [makerOrder, makerOrder2],
+            //   takerOrders: [takerOrder],
+            //   randomWords: 2
+            // })
+
+            this.mapContainer.set(requestId, {
+              makerOrders: makerOrders,
+              takerOrders: takerOrders,
+              randomStrategy,
+              modeOrderFulfillments,
+            });
+
+            this.taskContainer.delete(key);
+            // this.mapContainer.set(requestId, value)
+            this.webSocketClient.sendPrepareMessage(
+              JSON.stringify({
+                key,
+                value: {
+                  status: true,
+                  data: {
+                    requestId,
+                    orderHashes
+                  }
+                }
+              }),
+            );
+          }
+        }
+      } else {
+        this.webSocketClient.sendPrepareMessage(
+          JSON.stringify({
+            key,
+            value: {
+              status: false,
+              data: 'Send tx failed'
+            }
+          }),
+        );
+      }
+
+      // this.etherProvider.getProvider()
+      //   .getTransactionReceipt(result.hash)
+
+      //   .then((receipt) => {
+
+      //     console.log('receipt::', receipt)
+
+      //     for (const log of receipt.logs || []) {
+      //       if (log.address != '0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625') {
+      //         continue;
+      //       }
+      //       const event = this.seaportProvider
+      //         .getTestContract()
+      //         .interface.parseLog(log);
+      //       if (event && event.name === 'RandomWordsRequested') {
+      //         const requestId = event.args['requestId'];
+      //         console.log('requestId:::', requestId);
+      //         console.log('Task publisher 推送消息')
+      //         // this.taskPublisher.emitTaskEvent({
+      //         //   requestId: "",
+      //         //   takerOrder: [],
+      //         //   makerOrder: [],
+      //         //   premiumOrder: [],
+      //         //   randomNumber: randomWords
+      //         // })
+      //         this.mapContainer.set(requestId, {
+      //           makerOrder: [makerOrder, makerOrder2],
+      //           takerOrder,
+      //         })
+      //         this.sendMessage(
+      //           JSON.stringify({
+      //             key,
+      //             value: requestId,
+      //           }),
+      //         );
+      //       }
+      //     }
+      //   })
+      //   .catch((error) => {
+      //     console.error("get transaction error::", error)
+      //   });
+    } catch (error) {
+      console.error(error);
+      // release();
+      this.webSocketClient.sendPrepareMessage(
+        JSON.stringify({
+          key,
+          value: {
+            status: false,
+            data: error.message
+          },
+        }),
+      );
+    } finally {
+      // this.sendPrepareMessage(
+      //   JSON.stringify({
+      //     key,
+      //     value: 'Send tx failed',
+      //   }),
+      // );
+      release();
+    }
+  }
+
 }

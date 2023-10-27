@@ -39,6 +39,8 @@ import { TransactionModule } from './transaction/transaction.module';
           user: configService.get('DB_USER', 'admin'), // 用户名
           pass: configService.get('DB_PASS', 'admin'), // 密码
           dbName: configService.get('DB_NAME', 'admin'), //数据库名
+          useNewUrlParser: true, 
+          useUnifiedTopology: true
         };
       },
     }),

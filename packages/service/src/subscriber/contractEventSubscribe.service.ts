@@ -71,7 +71,7 @@ export class ContractEventSubscribeService
     //   });
   }
 
-  @Cron(CronExpression.EVERY_MINUTE) // Cron expression (e.g., every hour)
+  @Cron(CronExpression.EVERY_10_MINUTES) // Cron expression (e.g., every hour)
   async handleHistoryBlockCron() {
     const release = await this.mutexManager.acquireLock();
 
@@ -201,7 +201,7 @@ export class ContractEventSubscribeService
           {
             itemType: 3,
             amount: '1',
-            token: "0x560B65205dEA9E14bB169c91650915503c41928C",
+            token: "0x6E6267A4D7196Cf98c8094723772c755eb4dC108",
             endAmount: '1',
             identifier: '0',
             recipient: offerer,
