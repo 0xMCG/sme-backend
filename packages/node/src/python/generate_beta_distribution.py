@@ -39,12 +39,12 @@ def sample_combined_beta_vrf(beta_params, randomWord):
     # Step 1: Choose which Beta distribution to sample from based on the external random number u1
     dist_idx = np.searchsorted(weight_cumsum, randomWord)
     
-    alpha, beta_param, _, _, _ = beta_params[dist_idx]
+    alpha, beta_param, _, lower_bound, upper_bound = beta_params[dist_idx]
     
     # Step 2: Perform inverse transform sampling on the chosen Beta distribution using external random number u2
     probability = betafuncion.ppf(randomWord, alpha, beta_param)  
 
-    y_numerator = int(probability * 1.0 * denominator)
+    y_numerator = int((probability * (upper_bound - lower_bound) + lower_bound) * denominator)
     y_denominator = int(denominator)
     result.append(y_numerator)
     result.append(y_denominator)
