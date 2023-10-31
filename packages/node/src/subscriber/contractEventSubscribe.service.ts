@@ -182,7 +182,8 @@ export class ContractEventSubscribeService {
     const release = await this.mutexManager.acquireLock();
     const key = this.taskContainer.getFirstKey();
 
-    const { makerOrders, takerOrders, randomNumberCount, randomStrategy, modeOrderFulfillments, orderHashes } = this.taskContainer.get(key)
+    const { makerOrders, takerOrders, randomNumberCount, randomStrategy, modeOrderFulfillments, orderHashes } = this.taskContainer.get(key);
+    this.taskContainer.delete(key);
     const contract = this.seaportProvider.getContract();
 
     try {
@@ -244,7 +245,7 @@ export class ContractEventSubscribeService {
               modeOrderFulfillments,
             });
 
-            this.taskContainer.delete(key);
+            // this.taskContainer.delete(key);
             // this.mapContainer.set(requestId, value)
             this.webSocketClient.sendPrepareMessage(
               JSON.stringify({

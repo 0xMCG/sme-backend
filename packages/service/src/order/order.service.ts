@@ -102,7 +102,7 @@ export class OrderService {
   }
 
   async findOne(hash: string) {
-    return await this.orderModel.find({ hash: hash }).limit(1).exec();
+    return await this.orderModel.findOne({ hash: hash }).limit(1).exec();
   }
 
   async deleteOne(hash: string) {
@@ -118,5 +118,32 @@ export class OrderService {
         },
       )
       .exec();
+  }
+
+  async findInvalidOrder(offerer: string, token: string, threshold: number) {
+    return await this.orderModel.aggregate([
+      {
+        $addFields: {
+          'entry.parameters.offer': {
+            $map: {
+              input: "$entry.parameters.offer",
+              as: "item",
+              in: {
+                token: "$$item.token",
+                startAmount: { $toDouble: "$$item.startAmount" } // 将属性b转换为数字
+              }
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          'entry.parameters.offerer': offerer,
+          'entry.parameters.offer.token': token,
+          'entry.parameters.offer.startAmount': { $gt: threshold },
+          'status': { $ne: OrderStatus.MATCHED }
+        }
+      }
+    ])
   }
 }

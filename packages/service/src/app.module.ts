@@ -65,6 +65,7 @@ import { TransactionModule } from './transaction/transaction.module';
     AppService,
     ContractEventSubscribeService,
     EtherProvider,
+    SeaportProvider,
     BlockService,
     SmeWebsocketGateway,
     TaskService

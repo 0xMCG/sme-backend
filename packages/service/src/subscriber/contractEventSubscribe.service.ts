@@ -14,6 +14,7 @@ import { ethers } from 'ethers';
 import { Seaport } from '@opensea/seaport-js';
 import { CreateOrderDto } from '../order/dto/create-order.dto';
 import { TaskService } from '../task/task.service';
+import { SeaportProvider } from '../lib/seaport.provider';
 
 const testERC20Address = "0x8D4E2c8bc6b1E4Fa0ED829E6786E9096dd6DC265"
 const testERC20Address2 = "0x6c877a0f432feaab6052d8cc4ae2cf3d686d589f"
@@ -30,6 +31,7 @@ export class ContractEventSubscribeService
 
   constructor(
     private readonly etherProvider: EtherProvider,
+    private readonly seaportProvider: SeaportProvider,
     private readonly orderService: OrderService,
     private readonly transactionService: TransactionService,
     private readonly mutexManager: MutexManager,
@@ -122,24 +124,42 @@ export class ContractEventSubscribeService
     release();
   }
 
-  // @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleLastBlockCron() {
     const release = await this.mutexManager.acquireLock();
-    const markerOrder = await this.build_maker_order_for_bid();
-    console.log('markerOrder::::', markerOrder);
-    let entry2Save: CreateOrderDto = new CreateOrderDto();
-    entry2Save.hash = markerOrder.hash;
-    entry2Save.entry = markerOrder.order as unknown as OrderEntry;
-    entry2Save.type = OrderType.INITIAL;
+    // const markerOrder = await this.build_maker_order_for_bid();
+    // console.log('markerOrder::::', markerOrder);
+    // let entry2Save: CreateOrderDto = new CreateOrderDto();
+    // entry2Save.hash = markerOrder.hash;
+    // entry2Save.entry = markerOrder.order as unknown as OrderEntry;
+    // entry2Save.type = OrderType.INITIAL;
 
-    console.log("````````````````````````",JSON.stringify(entry2Save))
-    this.orderService.create(entry2Save);
+    // console.log("````````````````````````",JSON.stringify(entry2Save))
+    // this.orderService.create(entry2Save);
+    await this.markerOrderAssetCheck('0x5fa5db05fc216552ba7d677781330913e11c4ec3de32c6b058421e05b9dd5de0')
+    
     release();
   }
 
   handleOrderMatched(orderHash: string) {
     this.transactionService.updateTransactionStatus(orderHash, OrderStatus.MATCHED);
     this.orderService.updateOrderStatus(orderHash, OrderStatus.MATCHED);
+  }
+
+  async markerOrderAssetCheck(orderHash: string) {
+    const order = await this.orderService.findOne(orderHash);
+    console.log("order::", order)
+    const owner = order.entry.parameters.offerer;
+    const item = order.entry.parameters.offer[0];
+    const balance = await this.seaportProvider.testBalanceOf(owner, item);
+    // 将剩余的offerer为owner的状态不为matched的订单,
+    // 并且offer中的nft资产大于剩余的balance的订单设置为invalid的状态
+    console.log('balance:::', balance?.toNumber())
+
+    const res = await this.orderService
+    .findInvalidOrder('0x89FC72d955C608dD412Fe65c5977c3c2872A6a81', '0x6E6267A4D7196Cf98c8094723772c755eb4dC108', 1);
+
+    console.log('res:::', res)
   }
 
   handleOrderCancelled(orderHash: string) {
@@ -155,12 +175,42 @@ export class ContractEventSubscribeService
     console.log('ifExited:::', ifExited)
     if (ifExited) {
       if (isSuccess) {
-        // 1. 将requestId对应的task更新为成功
-        this.taskService.update(ifExited.requestId, TaskStatus.MATCHED);
-        // 2. 从task中找到requestId对应的hashes更新为成功状态
-        if (ifExited.orderHashes && ifExited.orderHashes.length) {
-          for (const hash of ifExited.orderHashes) {
-            this.handleOrderMatched(hash)
+        if (ifExited.status === TaskStatus.MATCHED) {
+          // pass it
+          if (ifExited.orderHashes && ifExited.orderHashes.length) {
+            // for (const hash of ifExited.orderHashes) {
+            //   this.handleOrderMatched(hash)
+            // }
+            for (let index = 0; index < ifExited.orderHashes.length; index++) {
+              const hash = ifExited.orderHashes[index];
+
+              // const hash = '0xbfdc09f3ccc50b0aa3b067ae4c586088fc6879c2667f8549c81750b00a2281ce'
+              if (index !== ifExited.orderHashes.length -1) {
+                // 最后一个hash为taker订单，不需要做offer的校验
+                // const order = await this.orderService.findOne(hash);
+                // const owner = order.entry.parameters.offer;
+                // const item = order.entry.parameters.offerer[0];
+                // const balance = await this.seaportProvider.testBalanceOf(owner, item)
+
+              }
+              this.handleOrderMatched(hash)
+            }
+          }
+        } else {
+          // 1. 将requestId对应的task更新为成功
+          this.taskService.update(ifExited.requestId, TaskStatus.MATCHED);
+          // 2. 从task中找到requestId对应的hashes更新为成功状态
+          if (ifExited.orderHashes && ifExited.orderHashes.length) {
+            // for (const hash of ifExited.orderHashes) {
+            //   this.handleOrderMatched(hash)
+            // }
+            for (let index = 0; index < ifExited.orderHashes.length; index++) {
+              const hash = ifExited.orderHashes[index];
+              if (index !== ifExited.orderHashes.length -1) {
+                // 最后一个hash为taker订单，不需要做offer的校验
+              }
+              this.handleOrderMatched(hash)
+            }
           }
         }
       } else {
@@ -189,6 +239,7 @@ export class ContractEventSubscribeService
       overrides: { contractAddress: '0xDe215cECCb5707Cad33a9500Cede0C585A42FDA2' },
       conduitKeyToConduit: CONDUIT_KEYS_TO_CONDUIT,
     });
+    
     const offerer = '0x28c73A60ccF8c66c14EbA8935984e616Df2926e3';
     const { executeAllActions } = await seaport.createOrder(
       {
