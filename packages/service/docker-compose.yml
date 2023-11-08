@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  sme-backend:
+    image: coderyashiro/sme-backend:latest
+    restart: always
+    ports:
+      - 3000:3000
+    # volumes:
+    #   - './data:/usr/src/sme-backend/data'
+    environment:
+      - DB_HOST=mongodb://localhost:27017
+      - DB_USER=admin
+      - DB_PASS=admin
+      - DB_NAME=admin
+      - PROVIDER=

@@ -1,0 +1,149 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { SeaportProvider } from '../lib/seaport.provider';
+import { OrderQueryParams, OrderStatus, OrderType } from './types';
+
+@Injectable()
+export class OrderService {
+  constructor(
+    @InjectModel('Order') private readonly orderModel,
+    private readonly seaportProvider: SeaportProvider,
+  ) { }
+
+  async create(createOrderDto: CreateOrderDto) {
+    // const hash = this.seaportProvider.getProvider().getOrderHash(createOrderDto.entry.parameters as OrderComponents);
+    // createOrderDto.hash = hash;
+
+    // orderer & consideration check
+    if (
+      createOrderDto.entry.parameters.offer.length == 0 &&
+      createOrderDto.entry.parameters.consideration.length == 0
+    ) {
+      throw new HttpException(
+        'offer and consideration cannot be empty at the same time',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // hash check
+    const ifExist = await this.orderModel
+      .find({ hash: createOrderDto.hash })
+      .limit(1)
+      .exec();
+    if (ifExist.length != 0)
+      throw new HttpException('Order already exist', HttpStatus.BAD_REQUEST);
+    const model = new this.orderModel(createOrderDto);
+    return await model.save();
+  }
+
+  async findAll(query: OrderQueryParams) {
+    const current_timestamp = new Date().getTime() / 1000;
+    const conditionQuery = {
+      'entry.parameters.endTime': {
+        $gte: current_timestamp.toString(),
+      },
+      status: {
+        $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED],
+      },
+    };
+
+    if (query.type) {
+      conditionQuery['type'] = query.type;
+    } else {
+      conditionQuery['type'] = { $ne: OrderType.INITIAL }
+    }
+
+    if (query.offerer) {
+      conditionQuery['entry.parameters.offerer'] = query.offerer;
+    }
+
+    return await this.orderModel
+      .find(conditionQuery)
+      .exec();
+  }
+
+  async findRemainingNft() {
+    const current_timestamp = new Date().getTime() / 1000;
+    const conditionQuery = {
+      'entry.parameters.endTime': {
+        $gte: current_timestamp.toString(),
+      },
+      status: {
+        $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED, OrderStatus.PENDING],
+      },
+      type: OrderType.INITIAL
+    };
+
+    const result = await this.orderModel
+    .find(conditionQuery)
+    .exec();
+
+    return result?.length;
+  }
+
+  async  findInitialMarkerOrder() {
+    const current_timestamp = new Date().getTime() / 1000;
+    const conditionQuery = {
+      'entry.parameters.endTime': {
+        $gte: current_timestamp.toString(),
+      },
+      status: {
+        $nin: [OrderStatus.CANCELLED, OrderStatus.MATCHED, OrderStatus.PENDING],
+      },
+      type: OrderType.INITIAL
+    };
+
+    const result = await this.orderModel
+    .findOne(conditionQuery)
+    .exec();
+
+    return result;
+  }
+
+  async findOne(hash: string) {
+    return await this.orderModel.findOne({ hash: hash }).limit(1).exec();
+  }
+
+  async deleteOne(hash: string) {
+    return this.orderModel.deleteOne({ hash: hash }).exec();
+  }
+
+  async updateOrderStatus(hash: string, status: string) {
+    return this.orderModel
+      .updateOne(
+        { hash },
+        {
+          $set: { status },
+        },
+      )
+      .exec();
+  }
+
+  async findInvalidOrder(offerer: string, token: string, threshold: number) {
+    return await this.orderModel.aggregate([
+      {
+        $addFields: {
+          'entry.parameters.offer': {
+            $map: {
+              input: "$entry.parameters.offer",
+              as: "item",
+              in: {
+                token: "$$item.token",
+                startAmount: { $toDouble: "$$item.startAmount" } // 将属性b转换为数字
+              }
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          'entry.parameters.offerer': offerer,
+          'entry.parameters.offer.token': token,
+          'entry.parameters.offer.startAmount': { $gt: threshold },
+          'status': { $ne: OrderStatus.MATCHED }
+        }
+      }
+    ])
+  }
+}
