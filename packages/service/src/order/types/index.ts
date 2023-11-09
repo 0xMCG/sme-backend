@@ -66,6 +66,14 @@ class OrderEntry {
   parameters: OrderParameter;
   @ApiProperty()
   signature: string;
+  @ApiProperty({
+    type: Number,
+  })
+  numerator?: number;
+  @ApiProperty({
+    type: Number,
+  })
+  denominator?: number;
 }
 
 export enum OrderType {

@@ -18,14 +18,14 @@ export class ContractEventSubscribeService {
   static instance: any;
 
   constructor(
-    private readonly seaportProvider: SeaportProvider,
-    private readonly etherProvider: EtherProvider,
-    private readonly mutexManager: MutexManager,
-    private configService: ConfigService,
-    private readonly mapContainer: MapContainer,
-    private readonly taskPublisher: TaskPublisher,
-    private readonly webSocketClient: WebSocketClient,
-    private readonly taskContainer: TaskContainer,
+      private readonly seaportProvider: SeaportProvider,
+      private readonly etherProvider: EtherProvider,
+      private readonly mutexManager: MutexManager,
+      private configService: ConfigService,
+      private readonly mapContainer: MapContainer,
+      private readonly taskPublisher: TaskPublisher,
+      private readonly webSocketClient: WebSocketClient,
+      private readonly taskContainer: TaskContainer,
   ) {
     if (ContractEventSubscribeService.instance) {
       return ContractEventSubscribeService.instance;
@@ -143,7 +143,7 @@ export class ContractEventSubscribeService {
         // console.log('event::', event)
         if (event && event.name === 'ReturnedRandomness') {
           const randomWords = event.args['randomWords'].map((e) =>
-            ethers.BigNumber.from(e).toString(),
+              ethers.BigNumber.from(e).toString(),
           );
           const requestId = event.args['requestId'].toString();
           // console.log('randomWords:::', randomWords);
@@ -188,13 +188,13 @@ export class ContractEventSubscribeService {
 
     try {
       const result = await contract.prepare(
-        [...makerOrders, ...takerOrders],
-        // premiumOrder在前面数组的下标
-        [],
-        [],
-        // 2个随机数
-        randomNumberCount,
-        { gasLimit: 1000000 },
+          [...makerOrders, ...takerOrders],
+          // premiumOrder在前面数组的下标
+          [],
+          [],
+          // 2个随机数
+          randomNumberCount,
+          { gasLimit: 1000000 },
       );
 
       console.log('result.hash:::', result.hash);
@@ -207,8 +207,8 @@ export class ContractEventSubscribeService {
         console.log('123 retryCount: ', retryCount);
         retryCount++;
         receipt = await this.etherProvider
-          .getProvider()
-          .getTransactionReceipt(result.hash);
+            .getProvider()
+            .getTransactionReceipt(result.hash);
         await sleep(6000); // 等待6秒后继续检查交易确认
       }
 
@@ -220,119 +220,57 @@ export class ContractEventSubscribeService {
             continue;
           }
           const event = this.seaportProvider
-            .getTestContract()
-            .interface.parseLog(log);
+              .getTestContract()
+              .interface.parseLog(log);
           if (event && event.name === 'RandomWordsRequested') {
             const requestId = event.args['requestId']?.toString();
             console.log('requestId:::', requestId);
-            // this.taskPublisher.emitTaskEvent({
-            //   requestId: "",
-            //   takerOrder: [],
-            //   makerOrder: [],
-            //   premiumOrder: [],
-            //   randomNumber: randomWords
-            // })
-            // this.mapContainer.set(requestId, {
-            //   makerOrders: [makerOrder, makerOrder2],
-            //   takerOrders: [takerOrder],
-            //   randomWords: 2
-            // })
 
             this.mapContainer.set(requestId, {
-              makerOrders: makerOrders,
-              takerOrders: takerOrders,
+              makerOrders,
+              takerOrders,
               randomStrategy,
               modeOrderFulfillments,
             });
 
-            // this.taskContainer.delete(key);
-            // this.mapContainer.set(requestId, value)
             this.webSocketClient.sendPrepareMessage(
-              JSON.stringify({
-                key,
-                value: {
-                  status: true,
-                  data: {
-                    requestId,
-                    orderHashes
+                JSON.stringify({
+                  key,
+                  value: {
+                    status: true,
+                    data: {
+                      requestId,
+                      orderHashes
+                    }
                   }
-                }
-              }),
+                }),
             );
           }
         }
       } else {
         this.webSocketClient.sendPrepareMessage(
+            JSON.stringify({
+              key,
+              value: {
+                status: false,
+                data: 'Send tx failed'
+              }
+            }),
+        );
+      }
+
+    } catch (error) {
+      console.error(error);
+      this.webSocketClient.sendPrepareMessage(
           JSON.stringify({
             key,
             value: {
               status: false,
-              data: 'Send tx failed'
-            }
+              data: error.message
+            },
           }),
-        );
-      }
-
-      // this.etherProvider.getProvider()
-      //   .getTransactionReceipt(result.hash)
-
-      //   .then((receipt) => {
-
-      //     console.log('receipt::', receipt)
-
-      //     for (const log of receipt.logs || []) {
-      //       if (log.address != '0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625') {
-      //         continue;
-      //       }
-      //       const event = this.seaportProvider
-      //         .getTestContract()
-      //         .interface.parseLog(log);
-      //       if (event && event.name === 'RandomWordsRequested') {
-      //         const requestId = event.args['requestId'];
-      //         console.log('requestId:::', requestId);
-      //         console.log('Task publisher 推送消息')
-      //         // this.taskPublisher.emitTaskEvent({
-      //         //   requestId: "",
-      //         //   takerOrder: [],
-      //         //   makerOrder: [],
-      //         //   premiumOrder: [],
-      //         //   randomNumber: randomWords
-      //         // })
-      //         this.mapContainer.set(requestId, {
-      //           makerOrder: [makerOrder, makerOrder2],
-      //           takerOrder,
-      //         })
-      //         this.sendMessage(
-      //           JSON.stringify({
-      //             key,
-      //             value: requestId,
-      //           }),
-      //         );
-      //       }
-      //     }
-      //   })
-      //   .catch((error) => {
-      //     console.error("get transaction error::", error)
-      //   });
-    } catch (error) {
-      console.error(error);
-      // release();
-      this.webSocketClient.sendPrepareMessage(
-        JSON.stringify({
-          key,
-          value: {
-            status: false,
-            data: error.message
-          },
-        }),
       );
     } finally {
-      // this.sendPrepareMessage(
-      //   JSON.stringify({
-      //     key,
-      //     value: 'Send tx failed',
-      //   }),
-      // );
       release();
     }
   }
