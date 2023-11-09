@@ -35,11 +35,11 @@ import { TransactionModule } from './transaction/transaction.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         return {
-          uri: configService.get('DB_HOST', 'localhost'), // 主机，默认为localhost
+          uri: configService.get('DB_HOST', 'mongodb://localhost:27017'), // 主机，默认为localhost
           user: configService.get('DB_USER', 'admin'), // 用户名
           pass: configService.get('DB_PASS', 'admin'), // 密码
           dbName: configService.get('DB_NAME', 'admin'), //数据库名
-          useNewUrlParser: true, 
+          useNewUrlParser: true,
           useUnifiedTopology: true
         };
       },

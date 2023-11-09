@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Subject } from 'rxjs';
+import {PromiseOrValue} from "../lib/typechain-types-dual/common";
+import {BigNumberish, BytesLike} from "ethers";
 
 export interface Task {
   requestId: string;
@@ -9,6 +11,15 @@ export interface Task {
   takerOrder?: any[];
   premiumOrder?: any[];
   modeOrderFulfillments: any[];
+}
+
+export type OrderPrice = {
+  orderHash: PromiseOrValue<BytesLike>;
+  numerator: PromiseOrValue<BigNumberish>;
+  denominator: PromiseOrValue<BigNumberish>;
+  itemNumerator: PromiseOrValue<BigNumberish>;
+  itemDenominator: PromiseOrValue<BigNumberish>;
+  price: PromiseOrValue<BigNumberish>;
 }
 
 @Injectable()

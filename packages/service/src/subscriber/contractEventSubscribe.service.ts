@@ -10,18 +10,19 @@ import { OrderEntry, OrderStatus, OrderType, TaskStatus } from '../order/types';
 import { BlockService } from '../block/block.service';
 import { MutexManager } from './MutexManager';
 import { TransactionService } from '../transaction/transaction.service';
-import { ethers } from 'ethers';
+import {BigNumber, ethers} from 'ethers';
 import { Seaport } from '@opensea/seaport-js';
 import { CreateOrderDto } from '../order/dto/create-order.dto';
 import { TaskService } from '../task/task.service';
 import { SeaportProvider } from '../lib/seaport.provider';
+import * as _ from 'lodash';
 
 const testERC20Address = "0x8D4E2c8bc6b1E4Fa0ED829E6786E9096dd6DC265"
 const testERC20Address2 = "0x6c877a0f432feaab6052d8cc4ae2cf3d686d589f"
 
 @Injectable()
 export class ContractEventSubscribeService
-  implements OnModuleInit, OnApplicationShutdown
+    implements OnModuleInit, OnApplicationShutdown
 {
   private blockNumber;
   private _blockDBId;
@@ -30,13 +31,13 @@ export class ContractEventSubscribeService
   static instance: any;
 
   constructor(
-    private readonly etherProvider: EtherProvider,
-    private readonly seaportProvider: SeaportProvider,
-    private readonly orderService: OrderService,
-    private readonly transactionService: TransactionService,
-    private readonly mutexManager: MutexManager,
-    private readonly blockService: BlockService,
-    private readonly taskService: TaskService,
+      private readonly etherProvider: EtherProvider,
+      private readonly seaportProvider: SeaportProvider,
+      private readonly orderService: OrderService,
+      private readonly transactionService: TransactionService,
+      private readonly mutexManager: MutexManager,
+      private readonly blockService: BlockService,
+      private readonly taskService: TaskService,
   ) {
     this.blockNumber = 0;
 
@@ -87,7 +88,7 @@ export class ContractEventSubscribeService
       toBlock : 'latest',
       topics : filterOrderMatched.topics
     }
-    
+
     provider.getLogs(filterOrderMatchedLog).then((result) => {
       console.log('Order Matched result:::', result.length);
       for (const res of result) {
@@ -96,7 +97,7 @@ export class ContractEventSubscribeService
           // console.log('event::', event)
           const hashes = event.args['orderHashes'] as [];
           for (const hash of hashes) {
-            this.handleOrderMatched(hash);
+            this.handleOrderMatched(hash, event.transactionHash);
           }
         }
       }
@@ -112,12 +113,13 @@ export class ContractEventSubscribeService
       for (const res of result) {
         const event = seaportContract.interface.parseLog(res);
         if (event && event.name === 'MatchSuccessOrNot') {
+          const txHash = event.transactionHash;
           // console.log('event::', event)
-          const requestId = event.args['requestId']?.toString();;
+          const requestId = event.args['requestId']?.toString();
           const isSuccess = event.args['isSuccess'];
           console.log('requestId:::', requestId);
           console.log('isSuccess:::', isSuccess);
-          this.handleMatchSuccessOrNot(requestId, isSuccess);
+          this.handleMatchSuccessOrNot(requestId, isSuccess, txHash);
         }
       }
     }).catch(console.error)
@@ -137,13 +139,36 @@ export class ContractEventSubscribeService
     // console.log("````````````````````````",JSON.stringify(entry2Save))
     // this.orderService.create(entry2Save);
     await this.markerOrderAssetCheck('0x5fa5db05fc216552ba7d677781330913e11c4ec3de32c6b058421e05b9dd5de0')
-    
+
     release();
   }
 
-  handleOrderMatched(orderHash: string) {
-    this.transactionService.updateTransactionStatus(orderHash, OrderStatus.MATCHED);
-    this.orderService.updateOrderStatus(orderHash, OrderStatus.MATCHED);
+  async handleOrderMatched(orderHash: string, txHash: string) {
+    await this.transactionService.updateTransactionStatus(orderHash, txHash, OrderStatus.MATCHED);
+    const matchedTxHashList = await this.transactionService.findByOrderHash(orderHash, OrderStatus.MATCHED);
+    if (matchedTxHashList.length > 0) {
+      // 查询所有已match transaction, 计算分子与分母是否等于1,如果等于1说明该订单match
+      if (this.calculateOrderFinished(matchedTxHashList)) {
+        await this.orderService.updateOrderStatus(orderHash, OrderStatus.MATCHED);
+      }
+    }
+  }
+
+  calculateOrderFinished(txList: any[]): boolean {
+    const length = txList.length
+    if (length <= 0) {
+      return false;
+    } else if (length === 1) {
+      return (txList[0].itemNumerator as number) === (txList[0].itemDenominator as number);
+    } else {
+      // TODO: 将所有的多个分子分母求结果
+      let multiplyAll = 1;
+      txList.forEach(i => {
+        multiplyAll = multiplyAll * i.itemDenominator;
+      })
+      const numeratorSum = _(txList).map(i => i.itemNumerator * _.divide(multiplyAll, i.itemDenominator)).sum();
+      return numeratorSum === multiplyAll;
+    }
   }
 
   async markerOrderAssetCheck(orderHash: string) {
@@ -157,7 +182,7 @@ export class ContractEventSubscribeService
     console.log('balance:::', balance?.toNumber())
 
     const res = await this.orderService
-    .findInvalidOrder('0x89FC72d955C608dD412Fe65c5977c3c2872A6a81', '0x6E6267A4D7196Cf98c8094723772c755eb4dC108', 1);
+        .findInvalidOrder('0x89FC72d955C608dD412Fe65c5977c3c2872A6a81', '0x6E6267A4D7196Cf98c8094723772c755eb4dC108', 1);
 
     console.log('res:::', res)
   }
@@ -170,7 +195,7 @@ export class ContractEventSubscribeService
     this.orderService.updateOrderStatus(orderHash, OrderStatus.FAILED);
   }
 
-  async handleMatchSuccessOrNot(requestId: string, isSuccess: boolean) {
+  async handleMatchSuccessOrNot(requestId: string, isSuccess: boolean, txHash: string) {
     const ifExited = await this.taskService.findOne(requestId);
     console.log('ifExited:::', ifExited)
     if (ifExited) {
@@ -193,7 +218,7 @@ export class ContractEventSubscribeService
                 // const balance = await this.seaportProvider.testBalanceOf(owner, item)
 
               }
-              this.handleOrderMatched(hash)
+              await this.handleOrderMatched(hash, txHash)
             }
           }
         } else {
@@ -209,7 +234,7 @@ export class ContractEventSubscribeService
               if (index !== ifExited.orderHashes.length -1) {
                 // 最后一个hash为taker订单，不需要做offer的校验
               }
-              this.handleOrderMatched(hash)
+              await this.handleOrderMatched(hash, txHash)
             }
           }
         }
@@ -218,9 +243,8 @@ export class ContractEventSubscribeService
         this.taskService.update(ifExited.requestId, TaskStatus.FAILED);
         // 4. 从task中找到requestId对应的hashes更新为失败状态
         if (ifExited.orderHashes && ifExited.orderHashes.length) {
-          for (const hash of ifExited.orderHashes) {
-            this.handleOrderFailed(hash)
-          }
+          // orderHashes中最后一个为takerOrder,只将takerOrder标记为无效,makerOrder可以继续成交
+          await this.handleOrderFailed(ifExited.orderHashes[ifExited.orderHashes.length - 1])
         }
       }
     }
@@ -230,7 +254,7 @@ export class ContractEventSubscribeService
 
     const CONDUIT_KEYS_TO_CONDUIT = {
       '0x28c73a60ccf8c66c14eba8935984e616df2926e3aaaaaaaaaaaaaaaaaaaaaa00':
-        '0x0681bc8f138ca32ed7725b91e8d11cfb6e10eb5f',
+          '0x0681bc8f138ca32ed7725b91e8d11cfb6e10eb5f',
     };
     // const privateKey = process.env["MAKER"] as string;
     const Signer = new ethers.Wallet('f4ca61bd2d1de03ecc52eeba0d28fda8eccf990692254de9811d538e0bdb0bdb', this.etherProvider.getProvider());
@@ -239,34 +263,34 @@ export class ContractEventSubscribeService
       overrides: { contractAddress: '0xDe215cECCb5707Cad33a9500Cede0C585A42FDA2' },
       conduitKeyToConduit: CONDUIT_KEYS_TO_CONDUIT,
     });
-    
+
     const offerer = '0x28c73A60ccF8c66c14EbA8935984e616Df2926e3';
     const { executeAllActions } = await seaport.createOrder(
-      {
-        zone: '0x0000000000000000000000000000000000000000',
-        conduitKey:
-          '0x28c73a60ccf8c66c14eba8935984e616df2926e3aaaaaaaaaaaaaaaaaaaaaa00',
-        startTime: Math.floor(new Date().getTime() / 1000 - 60 * 60).toString(),
-        endTime: Math.floor(new Date().getTime() / 1000 + 60 * 60 * 24 * 7).toString(),
-        consideration: [
-          {
-            itemType: 3,
-            amount: '1',
-            token: "0x6E6267A4D7196Cf98c8094723772c755eb4dC108",
-            endAmount: '1',
-            identifier: '0',
-            recipient: offerer,
-          },
-        ],
-        offer: [
-          {
-            amount: ethers.utils.parseEther('1').toString(),
-            token: "0x8D4E2c8bc6b1E4Fa0ED829E6786E9096dd6DC265",
-            endAmount: ethers.utils.parseEther('100').toString()
-          },
-        ],
-      },
-      offerer,
+        {
+          zone: '0x0000000000000000000000000000000000000000',
+          conduitKey:
+              '0x28c73a60ccf8c66c14eba8935984e616df2926e3aaaaaaaaaaaaaaaaaaaaaa00',
+          startTime: Math.floor(new Date().getTime() / 1000 - 60 * 60).toString(),
+          endTime: Math.floor(new Date().getTime() / 1000 + 60 * 60 * 24 * 7).toString(),
+          consideration: [
+            {
+              itemType: 3,
+              amount: '1',
+              token: "0x6E6267A4D7196Cf98c8094723772c755eb4dC108",
+              endAmount: '1',
+              identifier: '0',
+              recipient: offerer,
+            },
+          ],
+          offer: [
+            {
+              amount: ethers.utils.parseEther('1').toString(),
+              token: "0x8D4E2c8bc6b1E4Fa0ED829E6786E9096dd6DC265",
+              endAmount: ethers.utils.parseEther('100').toString()
+            },
+          ],
+        },
+        offerer,
     );
 
     const order = await executeAllActions();

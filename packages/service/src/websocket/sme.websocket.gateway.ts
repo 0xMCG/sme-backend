@@ -11,10 +11,10 @@ import { OrderStatus } from '../order/types';
 export class SmeWebsocketGateway {
 
   constructor(private readonly mapContainer: MapContainer,
-    private readonly taskService: TaskService,
-    private readonly transactionService: TransactionService,
-    ) {}
-  
+              private readonly taskService: TaskService,
+              private readonly transactionService: TransactionService,
+  ) {}
+
   @WebSocketServer()
   server: Server;
 
@@ -57,9 +57,12 @@ export class SmeWebsocketGateway {
   handleProbabilityMessage(client: Socket, @MessageBody() payload: any) {
     console.log('Received matched message:', payload);
     const receivedPayload = JSON.parse(payload);
-    // 将收到的信息保存到数据库
-    for (const iterator of receivedPayload) {
+    const prices = receivedPayload.orderPrices;
+    const txHash = receivedPayload.txHash;
+    // 订单交易价格保存到数据库
+    for (const iterator of prices) {
       iterator.status = OrderStatus.PENDING;
+      iterator.txHash = txHash;
       this.transactionService.create(iterator)
     }
     return payload;

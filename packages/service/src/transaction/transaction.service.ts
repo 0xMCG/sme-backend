@@ -7,7 +7,7 @@ import { UpdateTransactionDto } from './dto/update-transaction.dto';
 export class TransactionService {
 
   constructor(@InjectModel('Transaction') private readonly transactionModel) {
-    
+
   }
 
   async create(createTransactionDto: CreateTransactionDto) {
@@ -51,14 +51,26 @@ export class TransactionService {
     return `This action removes a #${id} transaction`;
   }
 
-  async updateTransactionStatus(hash: string, status: string) {
+  async findByOrderHash(orderHash: string, status: string): Promise<any[]> {
+    return this.transactionModel.findAll({
+      orderHash,
+      status
+    }).exec();
+  }
+
+  async updateTransactionStatus(hash: string, txHash: string, status: string) {
     return this.transactionModel
-      .updateOne(
-        { orderHash: hash },
-        {
-          $set: { status },
-        },
-      )
-      .exec();
+        .updateOne(
+            {
+              orderHash: hash,
+              txHash
+            },
+            {
+              $set: {
+                status
+              },
+            },
+        )
+        .exec();
   }
 }
