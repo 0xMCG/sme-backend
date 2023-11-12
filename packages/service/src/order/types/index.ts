@@ -77,9 +77,9 @@ class OrderEntry {
 }
 
 export enum OrderType {
-  BID = '1',
-  SELL = '2',
-  INITIAL = '3'
+  BID = 1,
+  SELL = 2,
+  INITIAL = 3
 }
 
 export { Offer, Consideration, OrderEntry };
@@ -103,4 +103,24 @@ export class OrderQueryParams {
   status: string;
   type: string;
   offerer: string;
+}
+
+export class OrderPrice {
+  max: number;
+  min: number;
+  orderType: OrderType;
+  quantity: number;
+}
+
+export class OrderDistribution {
+  maxPrice: number = 0;
+  minPrice: number = 0;
+  precision: number = 0.1;
+  bidExpectationList: PriceExpectation[];
+  listExpectationList: PriceExpectation[];
+}
+
+export class PriceExpectation {
+  price: number;
+  expectation: number;
 }

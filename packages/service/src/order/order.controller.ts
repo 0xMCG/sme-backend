@@ -40,4 +40,9 @@ export class OrderController {
   delete(@Param('hash') hash: string) {
     return this.orderService.deleteOne(hash);
   }
+
+  @Get('/orderDistribution')
+  orderDistribution(@Query('precision')precision: number = 0.1) {
+    return this.orderService.orderDistribution(precision);
+  }
 }

@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { FillOrderDto } from './dto/fill-order.dto';
-import { SmeWebsocketGateway } from 'src/websocket/sme.websocket.gateway';
+import { SmeWebsocketGateway } from '../websocket/sme.websocket.gateway';
 import * as crypto from 'crypto';
 import { MapContainer } from '../map.container';
-import { OrderService } from 'src/order/order.service';
-import { OrderStatus } from 'src/order/types';
+import { OrderService } from '../order/order.service';
+import { OrderStatus } from '../order/types';
 
 function sleep(ms: any) {
   return new Promise((resolve) => {

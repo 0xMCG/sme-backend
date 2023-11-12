@@ -4,4 +4,7 @@ export class CreateTransactionDto {
     status: string;
     numerator: string;
     denominator: string;
+    itemNumerator: string;
+    itemDenominator: string;
+    itemSize: number
 }

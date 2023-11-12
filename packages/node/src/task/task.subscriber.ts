@@ -5,7 +5,7 @@ import {OrderPrice, Task, TaskPublisher} from './task.publisher';
 import { PythonService } from '../python/python.service';
 import { MatchOrdersFulfillment } from '@opensea/seaport-js/lib/types';
 import { WebSocketClient } from '../websocket/websocket.client';
-import * as lodash from 'lodash';
+import * as _ from 'lodash';
 import {ContractTransaction, ethers} from 'ethers';
 @Injectable()
 export class TaskSubscriber {
@@ -95,10 +95,11 @@ export class TaskSubscriber {
     const result = JSON.parse(execResult);
     const numerator = result[0];
     const denominator = result[1];
-    const rate = lodash.round(lodash.divide(numerator, denominator), 2);
+    const rate = _.round(_.divide(numerator, denominator), 2);
     const offer = order.parameters.offer;
     const consideration = order.parameters.consideration;
     let price = 0;
+    let itemSize = 1;
     // 查询order中包含erc20的item计算价格
     if (offer[0].itemType === 1) {
       const ethereumStartValue = ethers.BigNumber.from(offer[0].startAmount); // 以太坊的数值
@@ -117,6 +118,13 @@ export class TaskSubscriber {
       const end = parseFloat(ethers.utils.formatEther(ethereumEndValue));
       price = (end - start) * rate + start;
     }
+
+    // 计算order该可以成交的erc1155数量(startAmount和endAmount均可应该相同,都表示订单成交总数量,需要乘以订单百分比计算实际成交数量)
+    if (offer[0].itemType === 3) {
+      itemSize = _.divide(_.multiply(offer[0].startAmount, order.numerator), order.denominator);
+    } else if (consideration[0].itemType === 3) {
+      itemSize = _.divide(_.multiply(offer[0].startAmount, order.numerator), order.denominator);
+    }
     const orderHash = this.seaportProvider
         .getSeaport()
         .getOrderHash(order.parameters);
@@ -127,6 +135,7 @@ export class TaskSubscriber {
       denominator,
       itemNumerator: order.numerator,
       itemDenominator: order.denominator,
+      itemSize
     }
   }
 }

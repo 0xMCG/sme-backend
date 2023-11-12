@@ -5,7 +5,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cors from 'cors';
 import { Response } from './common/response';
 import { HttpFilter } from './common/filter';
-import { SubscribeModule } from './subscriber/subscribe.module';
 import { ContractEventSubscribeService } from './subscriber/contractEventSubscribe.service';
 
 async function bootstrap() {

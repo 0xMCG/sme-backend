@@ -11,7 +11,7 @@ import {
 import { SystemService } from './system.service';
 import { Royalties } from './dto/create-royalties.dto';
 import { UpdateSystemDto } from './dto/update-system.dto';
-import { Web3AuthGuardInterceptor } from 'src/web3-auth-guard/web3-auth-guard.interceptor';
+import { Web3AuthGuardInterceptor } from '../web3-auth-guard/web3-auth-guard.interceptor';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('system')
