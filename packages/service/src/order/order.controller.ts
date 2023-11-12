@@ -42,7 +42,7 @@ export class OrderController {
   }
 
   @Get('/orderDistribution')
-  orderDistribution(@Query('precision')precision: number = 0.1) {
-    return this.orderService.orderDistribution(precision);
+  orderDistribution(@Query('precision')precision: number = 0.1, @Query('pointSize')pointSize: number = 20) {
+    return this.orderService.orderDistribution(precision, pointSize);
   }
 }

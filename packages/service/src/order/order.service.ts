@@ -28,12 +28,11 @@ export class OrderService {
 
   ) { }
 
-  async orderDistribution(precision: number): Promise<OrderDistribution> {
+  async orderDistribution(precision: number, pointSize: number): Promise<OrderDistribution> {
     // 查询最后一笔订单价格
     const lastTransaction = await this.transactionModel.findOne({ status: OrderStatus.MATCHED }).sort({_id: -1}).exec();
     let result = new OrderDistribution();
     if (!_.isEmpty(lastTransaction)) {
-      const pointSize = 20;
       const margin = new BigNumber(pointSize).multipliedBy(precision);
       const avgPrice = new BigNumber(lastTransaction.price).toNumber();
       const maxPrice = new BigNumber(avgPrice).plus(margin).toNumber();
