@@ -33,7 +33,7 @@ export class OrderService {
     const lastTransaction = await this.transactionModel.findOne({ status: OrderStatus.MATCHED }).sort({_id: -1}).exec();
     let result = new OrderDistribution();
     if (!_.isEmpty(lastTransaction)) {
-      const pointSize = 25;
+      const pointSize = 20;
       const margin = new BigNumber(pointSize).multipliedBy(precision);
       const avgPrice = new BigNumber(lastTransaction.price).toNumber();
       const maxPrice = new BigNumber(avgPrice).plus(margin).toNumber();
@@ -51,8 +51,10 @@ export class OrderService {
       if (_.isEmpty(validOrders)) {
         return result;
       }
-      const allOrderPrices: OrderPrice[] = this.parseOrderPrice(validOrders, maxPrice, minPrice);
+      const allOrderPrices: OrderPrice[] = this.parseOrderPrice(_.map(validOrders, i => i.entry), maxPrice, minPrice);
       result = this.calculateOrderDistribution(allOrderPrices, maxPrice, minPrice, precision);
+    } else {
+      console.log("no transactions...")
     }
     return result;
   }
@@ -68,7 +70,7 @@ export class OrderService {
     let itemPrice = minPrice;
     while (itemPrice <= maxPrice) {
       priceList.push(itemPrice);
-      itemPrice += precision;
+      itemPrice = new BigNumber(itemPrice).plus(precision).toNumber();
     }
 
     return {
@@ -85,10 +87,10 @@ export class OrderService {
       let expectation = new BigNumber(0);
       _.forEach(orderPrices, j => {
         if (j.max > i && j.min < i) {
-          const alpha = j.orderType === OrderType.INITIAL ? 3 : 2;
+          const alpha = j.orderType === OrderType.INITIAL ? 2 : 3;
           const beta = 3;
           const dist1 = formulajs.BETADIST(i, alpha, beta, true,  j.min, j.max);
-          const dist2 = formulajs.BETADIST(i + precision, alpha, beta, true,  j.min, j.max);
+          const dist2 = formulajs.BETADIST(new BigNumber(i).plus(precision).toNumber(), alpha, beta, true,  j.min, j.max);
           expectation = new BigNumber(expectation).plus(dist2).minus(dist1).multipliedBy(j.quantity);
         }
       })

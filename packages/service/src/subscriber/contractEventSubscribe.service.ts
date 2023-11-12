@@ -109,7 +109,7 @@ export class ContractEventSubscribeService
       topics : filterMatchSuccessOrNot.topics
     }
     provider.getLogs(filterMatchSuccessOrNotLog).then((result) => {
-      // console.log('result:::', result);
+      console.log('resultOrNot:::', result.length);
       for (const res of result) {
         const event = seaportContract.interface.parseLog(res);
         if (event && event.name === 'MatchSuccessOrNot') {

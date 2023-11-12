@@ -8,7 +8,7 @@ export class TaskService {
   constructor(@InjectModel('Task') private readonly taskModel) {}
 
   findAll() {
-    return this.taskModel.findAll().exec();
+    return this.taskModel.find().exec();
   }
 
   findOne(requestId: string) {

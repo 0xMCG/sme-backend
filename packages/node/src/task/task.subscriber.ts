@@ -121,9 +121,9 @@ export class TaskSubscriber {
 
     // 计算order该可以成交的erc1155数量(startAmount和endAmount均可应该相同,都表示订单成交总数量,需要乘以订单百分比计算实际成交数量)
     if (offer[0].itemType === 3) {
-      itemSize = _.divide(_.multiply(offer[0].startAmount, order.numerator), order.denominator);
+      itemSize = _.divide(_.multiply(offer[0].endAmount, order.numerator), order.denominator);
     } else if (consideration[0].itemType === 3) {
-      itemSize = _.divide(_.multiply(offer[0].startAmount, order.numerator), order.denominator);
+      itemSize = _.divide(_.multiply(offer[0].endAmount, order.numerator), order.denominator);
     }
     const orderHash = this.seaportProvider
         .getSeaport()
