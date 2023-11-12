@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Royalties } from './dto/create-royalties.dto';
 import { UpdateSystemDto } from './dto/update-system.dto';
-import { EtherProvider } from 'src/lib/ether.provider';
+import { EtherProvider } from '../lib/ether.provider';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()

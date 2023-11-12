@@ -173,6 +173,9 @@ export class ContractEventSubscribeService
 
   async markerOrderAssetCheck(orderHash: string) {
     const order = await this.orderService.findOne(orderHash);
+    if (_.isEmpty(order)) {
+      return;
+    }
     console.log("order::", order)
     const owner = order.entry.parameters.offerer;
     const item = order.entry.parameters.offer[0];
@@ -216,7 +219,6 @@ export class ContractEventSubscribeService
                 // const owner = order.entry.parameters.offer;
                 // const item = order.entry.parameters.offerer[0];
                 // const balance = await this.seaportProvider.testBalanceOf(owner, item)
-
               }
               await this.handleOrderMatched(hash, txHash)
             }

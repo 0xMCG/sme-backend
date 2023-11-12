@@ -20,6 +20,7 @@ export type OrderPrice = {
   itemNumerator: PromiseOrValue<BigNumberish>;
   itemDenominator: PromiseOrValue<BigNumberish>;
   price: PromiseOrValue<BigNumberish>;
+  itemSize: number;
 }
 
 @Injectable()
