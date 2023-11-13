@@ -440,7 +440,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+];
 
 export class ConduitControllerInterface__factory {
   static readonly abi = _abi;

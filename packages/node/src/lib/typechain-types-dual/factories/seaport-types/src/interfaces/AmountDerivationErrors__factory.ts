@@ -15,7 +15,7 @@ const _abi = [
     name: "InexactFraction",
     type: "error",
   },
-] as const;
+];
 
 export class AmountDerivationErrors__factory {
   static readonly abi = _abi;

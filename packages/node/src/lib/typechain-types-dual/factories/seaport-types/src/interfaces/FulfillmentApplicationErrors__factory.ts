@@ -42,7 +42,7 @@ const _abi = [
     name: "OfferAndConsiderationRequiredOnFulfillment",
     type: "error",
   },
-] as const;
+];
 
 export class FulfillmentApplicationErrors__factory {
   static readonly abi = _abi;

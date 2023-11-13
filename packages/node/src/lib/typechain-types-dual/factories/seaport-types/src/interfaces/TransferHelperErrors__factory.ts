@@ -157,7 +157,7 @@ const _abi = [
     name: "RecipientCannotBeZeroAddress",
     type: "error",
   },
-] as const;
+];
 
 export class TransferHelperErrors__factory {
   static readonly abi = _abi;

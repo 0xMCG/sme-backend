@@ -32,7 +32,7 @@ const _abi = [
     name: "InvalidRestrictedOrder",
     type: "error",
   },
-] as const;
+];
 
 export class ZoneInteractionErrors__factory {
   static readonly abi = _abi;

@@ -3,6 +3,7 @@
 /* eslint-disable */
 export * as eip1271WalletSol from "./EIP1271Wallet.sol";
 export * as invalidErc721RecipientSol from "./InvalidERC721Recipient.sol";
+export * as testVrfSol from "./TestVRF.sol";
 export { ConduitControllerMock__factory } from "./ConduitControllerMock__factory";
 export { ConduitMock__factory } from "./ConduitMock__factory";
 export { ConduitMockInvalidMagic__factory } from "./ConduitMockInvalidMagic__factory";

@@ -36,7 +36,7 @@ const _abi = [
     name: "InvalidSigner",
     type: "error",
   },
-] as const;
+];
 
 export class SignatureVerificationErrors__factory {
   static readonly abi = _abi;

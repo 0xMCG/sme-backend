@@ -13,6 +13,14 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "VRFCoordinatorV2Interface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.VRFCoordinatorV2Interface__factory>;
+    getContractFactory(
+      name: "VRFConsumerBaseV2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.VRFConsumerBaseV2__factory>;
+    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
@@ -265,6 +273,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestTransferValidationZoneOfferer__factory>;
     getContractFactory(
+      name: "IVRFInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IVRFInterface__factory>;
+    getContractFactory(
+      name: "TestVRF",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TestVRF__factory>;
+    getContractFactory(
       name: "TestZone",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestZone__factory>;
@@ -272,6 +288,14 @@ declare module "hardhat/types/runtime" {
       name: "TypehashDirectory",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TypehashDirectory__factory>;
+    getContractFactory(
+      name: "ISeaportContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISeaportContract__factory>;
+    getContractFactory(
+      name: "VRFConsumerV2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.VRFConsumerV2__factory>;
     getContractFactory(
       name: "PausableZoneControllerInterface",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -309,10 +333,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Assertions__factory>;
     getContractFactory(
-      name: "BasicOrderFulfiller",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BasicOrderFulfiller__factory>;
-    getContractFactory(
       name: "Consideration",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Consideration__factory>;
@@ -328,10 +348,6 @@ declare module "hardhat/types/runtime" {
       name: "CounterManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CounterManager__factory>;
-    getContractFactory(
-      name: "CriteriaResolution",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.CriteriaResolution__factory>;
     getContractFactory(
       name: "Executor",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -417,10 +433,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ContractOffererInterface__factory>;
     getContractFactory(
-      name: "CriteriaResolutionErrors",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.CriteriaResolutionErrors__factory>;
-    getContractFactory(
       name: "FulfillmentApplicationErrors",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FulfillmentApplicationErrors__factory>;
@@ -469,6 +481,16 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ZoneInterface__factory>;
 
+    getContractAt(
+      name: "VRFCoordinatorV2Interface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.VRFCoordinatorV2Interface>;
+    getContractAt(
+      name: "VRFConsumerBaseV2",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.VRFConsumerBaseV2>;
     getContractAt(
       name: "Ownable",
       address: string,
@@ -785,6 +807,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.TestTransferValidationZoneOfferer>;
     getContractAt(
+      name: "IVRFInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IVRFInterface>;
+    getContractAt(
+      name: "TestVRF",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TestVRF>;
+    getContractAt(
       name: "TestZone",
       address: string,
       signer?: ethers.Signer
@@ -794,6 +826,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.TypehashDirectory>;
+    getContractAt(
+      name: "ISeaportContract",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ISeaportContract>;
+    getContractAt(
+      name: "VRFConsumerV2",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.VRFConsumerV2>;
     getContractAt(
       name: "PausableZoneControllerInterface",
       address: string,
@@ -840,11 +882,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Assertions>;
     getContractAt(
-      name: "BasicOrderFulfiller",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.BasicOrderFulfiller>;
-    getContractAt(
       name: "Consideration",
       address: string,
       signer?: ethers.Signer
@@ -864,11 +901,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.CounterManager>;
-    getContractAt(
-      name: "CriteriaResolution",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.CriteriaResolution>;
     getContractAt(
       name: "Executor",
       address: string,
@@ -974,11 +1006,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ContractOffererInterface>;
-    getContractAt(
-      name: "CriteriaResolutionErrors",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.CriteriaResolutionErrors>;
     getContractAt(
       name: "FulfillmentApplicationErrors",
       address: string,

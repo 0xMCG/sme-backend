@@ -5,6 +5,8 @@ import type * as eip1271WalletSol from "./EIP1271Wallet.sol";
 export type { eip1271WalletSol };
 import type * as invalidErc721RecipientSol from "./InvalidERC721Recipient.sol";
 export type { invalidErc721RecipientSol };
+import type * as testVrfSol from "./TestVRF.sol";
+export type { testVrfSol };
 export type { ConduitControllerMock } from "./ConduitControllerMock";
 export type { ConduitMock } from "./ConduitMock";
 export type { ConduitMockInvalidMagic } from "./ConduitMockInvalidMagic";

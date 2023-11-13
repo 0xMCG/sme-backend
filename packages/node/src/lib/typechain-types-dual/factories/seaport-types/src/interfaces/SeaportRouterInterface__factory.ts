@@ -381,7 +381,7 @@ const _abi = [
     stateMutability: "payable",
     type: "receive",
   },
-] as const;
+];
 
 export class SeaportRouterInterface__factory {
   static readonly abi = _abi;

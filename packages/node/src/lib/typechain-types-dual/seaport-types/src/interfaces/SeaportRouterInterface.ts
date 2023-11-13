@@ -246,7 +246,7 @@ export declare namespace SeaportRouterInterface {
 
 export interface SeaportRouterInterfaceInterface extends utils.Interface {
   functions: {
-    "fulfillAvailableAdvancedOrders((address[],(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),uint120,uint120,bytes,bytes)[],(uint256,uint8,uint256,uint256,bytes32[])[],(uint256,uint256)[][],(uint256,uint256)[][],uint256)[],bytes32,address,uint256))": FunctionFragment;
+    "fulfillAvailableAdvancedOrders((address[],(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),uint120,uint120,bytes,bytes)[],(uint256,uint8,uint256,uint256,bytes32[])[],tuple[][],tuple[][],uint256)[],bytes32,address,uint256))": FunctionFragment;
     "getAllowedSeaportContracts()": FunctionFragment;
   };
 

@@ -150,7 +150,7 @@ const _abi = [
     name: "ZoneCreated",
     type: "event",
   },
-] as const;
+];
 
 export class PausableZoneEventsAndErrors__factory {
   static readonly abi = _abi;

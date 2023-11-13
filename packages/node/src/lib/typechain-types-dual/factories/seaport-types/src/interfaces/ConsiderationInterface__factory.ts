@@ -514,12 +514,27 @@ const _abi = [
             type: "tuple",
           },
           {
+            internalType: "uint120",
+            name: "numerator",
+            type: "uint120",
+          },
+          {
+            internalType: "uint120",
+            name: "denominator",
+            type: "uint120",
+          },
+          {
             internalType: "bytes",
             name: "signature",
             type: "bytes",
           },
+          {
+            internalType: "bytes",
+            name: "extraData",
+            type: "bytes",
+          },
         ],
-        internalType: "struct Order[]",
+        internalType: "struct AdvancedOrder[]",
         name: "",
         type: "tuple[]",
       },
@@ -786,12 +801,27 @@ const _abi = [
             type: "tuple",
           },
           {
+            internalType: "uint120",
+            name: "numerator",
+            type: "uint120",
+          },
+          {
+            internalType: "uint120",
+            name: "denominator",
+            type: "uint120",
+          },
+          {
             internalType: "bytes",
             name: "signature",
             type: "bytes",
           },
+          {
+            internalType: "bytes",
+            name: "extraData",
+            type: "bytes",
+          },
         ],
-        internalType: "struct Order[]",
+        internalType: "struct AdvancedOrder[]",
         name: "orders",
         type: "tuple[]",
       },
@@ -814,9 +844,9 @@ const _abi = [
     name: "prepare",
     outputs: [
       {
-        internalType: "bytes32[]",
+        internalType: "uint256",
         name: "",
-        type: "bytes32[]",
+        type: "uint256",
       },
     ],
     stateMutability: "payable",
@@ -969,7 +999,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+];
 
 export class ConsiderationInterface__factory {
   static readonly abi = _abi;

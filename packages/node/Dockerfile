@@ -20,7 +20,7 @@ WORKDIR /usr/src/sme
 COPY . .
 
 # Install dependencies
-RUN yarn
+RUN yarn && yarn build
 
 # Run
 ENTRYPOINT yarn cli start

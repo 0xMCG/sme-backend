@@ -17,7 +17,9 @@ WORKDIR /usr/src/sme
 COPY . .
 
 # Install dependencies
-RUN yarn && yarn build
+RUN yarn
+
+RUN yarn build
 
 # Run
 ENTRYPOINT yarn start:prod

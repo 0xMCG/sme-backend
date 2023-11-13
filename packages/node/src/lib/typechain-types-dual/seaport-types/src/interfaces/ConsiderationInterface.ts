@@ -151,14 +151,26 @@ export type OrderParametersStructOutput = [
   totalOriginalConsiderationItems: BigNumber;
 };
 
-export type OrderStruct = {
+export type AdvancedOrderStruct = {
   parameters: OrderParametersStruct;
+  numerator: PromiseOrValue<BigNumberish>;
+  denominator: PromiseOrValue<BigNumberish>;
   signature: PromiseOrValue<BytesLike>;
+  extraData: PromiseOrValue<BytesLike>;
 };
 
-export type OrderStructOutput = [OrderParametersStructOutput, string] & {
+export type AdvancedOrderStructOutput = [
+  OrderParametersStructOutput,
+  BigNumber,
+  BigNumber,
+  string,
+  string
+] & {
   parameters: OrderParametersStructOutput;
+  numerator: BigNumber;
+  denominator: BigNumber;
   signature: string;
+  extraData: string;
 };
 
 export type FulfillmentComponentStruct = {
@@ -230,6 +242,16 @@ export type ExecutionStructOutput = [
   string
 ] & { item: ReceivedItemStructOutput; offerer: string; conduitKey: string };
 
+export type OrderStruct = {
+  parameters: OrderParametersStruct;
+  signature: PromiseOrValue<BytesLike>;
+};
+
+export type OrderStructOutput = [OrderParametersStructOutput, string] & {
+  parameters: OrderParametersStructOutput;
+  signature: string;
+};
+
 export interface ConsiderationInterfaceInterface extends utils.Interface {
   functions: {
     "cancel((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256)[])": FunctionFragment;
@@ -239,9 +261,9 @@ export interface ConsiderationInterfaceInterface extends utils.Interface {
     "getOrderStatus(bytes32)": FunctionFragment;
     "incrementCounter()": FunctionFragment;
     "information()": FunctionFragment;
-    "matchOrdersWithRandom(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),bytes)[],((uint256,uint256)[],(uint256,uint256)[])[],uint256,(bytes32,uint256,uint256)[])": FunctionFragment;
+    "matchOrdersWithRandom(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),uint120,uint120,bytes,bytes)[],((uint256,uint256)[],(uint256,uint256)[])[],uint256,(bytes32,uint256,uint256)[])": FunctionFragment;
     "name()": FunctionFragment;
-    "prepare(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),bytes)[],uint256[],address[],uint32)": FunctionFragment;
+    "prepare(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),uint120,uint120,bytes,bytes)[],uint256[],address[],uint32)": FunctionFragment;
     "validate(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),bytes)[])": FunctionFragment;
   };
 
@@ -291,7 +313,7 @@ export interface ConsiderationInterfaceInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "matchOrdersWithRandom",
     values: [
-      OrderStruct[],
+      AdvancedOrderStruct[],
       FulfillmentStruct[],
       PromiseOrValue<BigNumberish>,
       OrderProbilityStruct[]
@@ -301,7 +323,7 @@ export interface ConsiderationInterfaceInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "prepare",
     values: [
-      OrderStruct[],
+      AdvancedOrderStruct[],
       PromiseOrValue<BigNumberish>[],
       PromiseOrValue<string>[],
       PromiseOrValue<BigNumberish>
@@ -419,7 +441,7 @@ export interface ConsiderationInterface extends BaseContract {
     >;
 
     matchOrdersWithRandom(
-      arg0: OrderStruct[],
+      arg0: AdvancedOrderStruct[],
       arg1: FulfillmentStruct[],
       requestId: PromiseOrValue<BigNumberish>,
       orderProbility: OrderProbilityStruct[],
@@ -431,7 +453,7 @@ export interface ConsiderationInterface extends BaseContract {
     ): Promise<[string] & { contractName: string }>;
 
     prepare(
-      orders: OrderStruct[],
+      orders: AdvancedOrderStruct[],
       premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
       recipients: PromiseOrValue<string>[],
       numWords: PromiseOrValue<BigNumberish>,
@@ -491,7 +513,7 @@ export interface ConsiderationInterface extends BaseContract {
   >;
 
   matchOrdersWithRandom(
-    arg0: OrderStruct[],
+    arg0: AdvancedOrderStruct[],
     arg1: FulfillmentStruct[],
     requestId: PromiseOrValue<BigNumberish>,
     orderProbility: OrderProbilityStruct[],
@@ -501,7 +523,7 @@ export interface ConsiderationInterface extends BaseContract {
   name(overrides?: CallOverrides): Promise<string>;
 
   prepare(
-    orders: OrderStruct[],
+    orders: AdvancedOrderStruct[],
     premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
     recipients: PromiseOrValue<string>[],
     numWords: PromiseOrValue<BigNumberish>,
@@ -559,7 +581,7 @@ export interface ConsiderationInterface extends BaseContract {
     >;
 
     matchOrdersWithRandom(
-      arg0: OrderStruct[],
+      arg0: AdvancedOrderStruct[],
       arg1: FulfillmentStruct[],
       requestId: PromiseOrValue<BigNumberish>,
       orderProbility: OrderProbilityStruct[],
@@ -569,12 +591,12 @@ export interface ConsiderationInterface extends BaseContract {
     name(overrides?: CallOverrides): Promise<string>;
 
     prepare(
-      orders: OrderStruct[],
+      orders: AdvancedOrderStruct[],
       premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
       recipients: PromiseOrValue<string>[],
       numWords: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<string[]>;
+    ): Promise<BigNumber>;
 
     validate(
       orders: OrderStruct[],
@@ -617,7 +639,7 @@ export interface ConsiderationInterface extends BaseContract {
     information(overrides?: CallOverrides): Promise<BigNumber>;
 
     matchOrdersWithRandom(
-      arg0: OrderStruct[],
+      arg0: AdvancedOrderStruct[],
       arg1: FulfillmentStruct[],
       requestId: PromiseOrValue<BigNumberish>,
       orderProbility: OrderProbilityStruct[],
@@ -627,7 +649,7 @@ export interface ConsiderationInterface extends BaseContract {
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
     prepare(
-      orders: OrderStruct[],
+      orders: AdvancedOrderStruct[],
       premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
       recipients: PromiseOrValue<string>[],
       numWords: PromiseOrValue<BigNumberish>,
@@ -673,7 +695,7 @@ export interface ConsiderationInterface extends BaseContract {
     information(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     matchOrdersWithRandom(
-      arg0: OrderStruct[],
+      arg0: AdvancedOrderStruct[],
       arg1: FulfillmentStruct[],
       requestId: PromiseOrValue<BigNumberish>,
       orderProbility: OrderProbilityStruct[],
@@ -683,7 +705,7 @@ export interface ConsiderationInterface extends BaseContract {
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     prepare(
-      orders: OrderStruct[],
+      orders: AdvancedOrderStruct[],
       premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
       recipients: PromiseOrValue<string>[],
       numWords: PromiseOrValue<BigNumberish>,

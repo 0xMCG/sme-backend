@@ -101,7 +101,7 @@ const _abi = [
     stateMutability: "payable",
     type: "function",
   },
-] as const;
+];
 
 export class ImmutableCreate2FactoryInterface__factory {
   static readonly abi = _abi;

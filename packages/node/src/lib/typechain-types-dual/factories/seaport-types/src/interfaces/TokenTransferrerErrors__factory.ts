@@ -135,7 +135,7 @@ const _abi = [
     name: "UnusedItemParameters",
     type: "error",
   },
-] as const;
+];
 
 export class TokenTransferrerErrors__factory {
   static readonly abi = _abi;

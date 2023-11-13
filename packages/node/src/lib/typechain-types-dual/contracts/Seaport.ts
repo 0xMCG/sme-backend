@@ -191,14 +191,26 @@ export type OrderComponentsStructOutput = [
   counter: BigNumber;
 };
 
-export type OrderStruct = {
+export type AdvancedOrderStruct = {
   parameters: OrderParametersStruct;
+  numerator: PromiseOrValue<BigNumberish>;
+  denominator: PromiseOrValue<BigNumberish>;
   signature: PromiseOrValue<BytesLike>;
+  extraData: PromiseOrValue<BytesLike>;
 };
 
-export type OrderStructOutput = [OrderParametersStructOutput, string] & {
+export type AdvancedOrderStructOutput = [
+  OrderParametersStructOutput,
+  BigNumber,
+  BigNumber,
+  string,
+  string
+] & {
   parameters: OrderParametersStructOutput;
+  numerator: BigNumber;
+  denominator: BigNumber;
   signature: string;
+  extraData: string;
 };
 
 export type FulfillmentComponentStruct = {
@@ -207,8 +219,8 @@ export type FulfillmentComponentStruct = {
 };
 
 export type FulfillmentComponentStructOutput = [BigNumber, BigNumber] & {
-  orderIndex: number;
-  itemIndex: number;
+  orderIndex: BigNumber;
+  itemIndex: BigNumber;
 };
 
 export type FulfillmentStruct = {
@@ -248,8 +260,19 @@ export type ExecutionStructOutput = [
   string
 ] & { item: ReceivedItemStructOutput; offerer: string; conduitKey: string };
 
+export type OrderStruct = {
+  parameters: OrderParametersStruct;
+  signature: PromiseOrValue<BytesLike>;
+};
+
+export type OrderStructOutput = [OrderParametersStructOutput, string] & {
+  parameters: OrderParametersStructOutput;
+  signature: string;
+};
+
 export interface SeaportInterface extends utils.Interface {
   functions: {
+    "addMember(address)": FunctionFragment;
     "cancel((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256)[])": FunctionFragment;
     "getContractOffererNonce(address)": FunctionFragment;
     "getCounter(address)": FunctionFragment;
@@ -257,10 +280,12 @@ export interface SeaportInterface extends utils.Interface {
     "getOrderStatus(bytes32)": FunctionFragment;
     "incrementCounter()": FunctionFragment;
     "information()": FunctionFragment;
-    "matchOrdersWithRandom(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),bytes)[],((uint256,uint256)[],(uint256,uint256)[])[],uint256,(bytes32,uint256,uint256)[])": FunctionFragment;
+    "matchOrdersWithRandom(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),uint120,uint120,bytes,bytes)[],((uint256,uint256)[],(uint256,uint256)[])[],uint256,(bytes32,uint256,uint256)[])": FunctionFragment;
     "name()": FunctionFragment;
+    "onERC1155Received(address,address,uint256,uint256,bytes)": FunctionFragment;
     "owner()": FunctionFragment;
-    "prepare(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),bytes)[],uint256[],address[],uint32)": FunctionFragment;
+    "prepare(((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),uint120,uint120,bytes,bytes)[],uint256[],address[],uint32)": FunctionFragment;
+    "removeMember(address)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "updateVRFAddress(address)": FunctionFragment;
@@ -270,6 +295,7 @@ export interface SeaportInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "addMember"
       | "cancel"
       | "getContractOffererNonce"
       | "getCounter"
@@ -279,8 +305,10 @@ export interface SeaportInterface extends utils.Interface {
       | "information"
       | "matchOrdersWithRandom"
       | "name"
+      | "onERC1155Received"
       | "owner"
       | "prepare"
+      | "removeMember"
       | "renounceOwnership"
       | "transferOwnership"
       | "updateVRFAddress"
@@ -288,6 +316,10 @@ export interface SeaportInterface extends utils.Interface {
       | "vrfOwner"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "addMember",
+    values: [PromiseOrValue<string>]
+  ): string;
   encodeFunctionData(
     functionFragment: "cancel",
     values: [OrderComponentsStruct[]]
@@ -319,22 +351,36 @@ export interface SeaportInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "matchOrdersWithRandom",
     values: [
-      OrderStruct[],
+      AdvancedOrderStruct[],
       FulfillmentStruct[],
       PromiseOrValue<BigNumberish>,
       OrderProbilityStruct[]
     ]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "onERC1155Received",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>
+    ]
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "prepare",
     values: [
-      OrderStruct[],
+      AdvancedOrderStruct[],
       PromiseOrValue<BigNumberish>[],
       PromiseOrValue<string>[],
       PromiseOrValue<BigNumberish>
     ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "removeMember",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -354,6 +400,7 @@ export interface SeaportInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "vrfOwner", values?: undefined): string;
 
+  decodeFunctionResult(functionFragment: "addMember", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "cancel", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getContractOffererNonce",
@@ -381,8 +428,16 @@ export interface SeaportInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "onERC1155Received",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "prepare", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "removeMember",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -400,6 +455,7 @@ export interface SeaportInterface extends utils.Interface {
 
   events: {
     "CounterIncremented(uint256,address)": EventFragment;
+    "MatchSuccessOrNot(uint256,bool)": EventFragment;
     "OrderCancelled(bytes32,address,address)": EventFragment;
     "OrderFulfilled(bytes32,address,address,address,tuple[],tuple[])": EventFragment;
     "OrderValidated(bytes32,tuple)": EventFragment;
@@ -408,6 +464,7 @@ export interface SeaportInterface extends utils.Interface {
   };
 
   getEvent(nameOrSignatureOrTopic: "CounterIncremented"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MatchSuccessOrNot"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OrderCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OrderFulfilled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OrderValidated"): EventFragment;
@@ -426,6 +483,18 @@ export type CounterIncrementedEvent = TypedEvent<
 
 export type CounterIncrementedEventFilter =
   TypedEventFilter<CounterIncrementedEvent>;
+
+export interface MatchSuccessOrNotEventObject {
+  requestId: BigNumber;
+  isSuccess: boolean;
+}
+export type MatchSuccessOrNotEvent = TypedEvent<
+  [BigNumber, boolean],
+  MatchSuccessOrNotEventObject
+>;
+
+export type MatchSuccessOrNotEventFilter =
+  TypedEventFilter<MatchSuccessOrNotEvent>;
 
 export interface OrderCancelledEventObject {
   orderHash: string;
@@ -521,6 +590,11 @@ export interface Seaport extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    addMember(
+      addr: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     cancel(
       orders: OrderComponentsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -568,7 +642,7 @@ export interface Seaport extends BaseContract {
     >;
 
     matchOrdersWithRandom(
-      arg0: OrderStruct[],
+      arg0: AdvancedOrderStruct[],
       arg1: FulfillmentStruct[],
       requestId: PromiseOrValue<BigNumberish>,
       orderProbility: OrderProbilityStruct[],
@@ -577,14 +651,28 @@ export interface Seaport extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<[string]>;
 
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     prepare(
-      orders: OrderStruct[],
+      orders: AdvancedOrderStruct[],
       premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
       recipients: PromiseOrValue<string>[],
       numWords: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    removeMember(
+      addr: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     renounceOwnership(
@@ -608,6 +696,11 @@ export interface Seaport extends BaseContract {
 
     vrfOwner(overrides?: CallOverrides): Promise<[string]>;
   };
+
+  addMember(
+    addr: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   cancel(
     orders: OrderComponentsStruct[],
@@ -656,7 +749,7 @@ export interface Seaport extends BaseContract {
   >;
 
   matchOrdersWithRandom(
-    arg0: OrderStruct[],
+    arg0: AdvancedOrderStruct[],
     arg1: FulfillmentStruct[],
     requestId: PromiseOrValue<BigNumberish>,
     orderProbility: OrderProbilityStruct[],
@@ -665,14 +758,28 @@ export interface Seaport extends BaseContract {
 
   name(overrides?: CallOverrides): Promise<string>;
 
+  onERC1155Received(
+    operator: PromiseOrValue<string>,
+    from: PromiseOrValue<string>,
+    id: PromiseOrValue<BigNumberish>,
+    value: PromiseOrValue<BigNumberish>,
+    data: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   prepare(
-    orders: OrderStruct[],
+    orders: AdvancedOrderStruct[],
     premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
     recipients: PromiseOrValue<string>[],
     numWords: PromiseOrValue<BigNumberish>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  removeMember(
+    addr: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   renounceOwnership(
@@ -697,6 +804,11 @@ export interface Seaport extends BaseContract {
   vrfOwner(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
+    addMember(
+      addr: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     cancel(
       orders: OrderComponentsStruct[],
       overrides?: CallOverrides
@@ -742,7 +854,7 @@ export interface Seaport extends BaseContract {
     >;
 
     matchOrdersWithRandom(
-      arg0: OrderStruct[],
+      arg0: AdvancedOrderStruct[],
       arg1: FulfillmentStruct[],
       requestId: PromiseOrValue<BigNumberish>,
       orderProbility: OrderProbilityStruct[],
@@ -751,15 +863,29 @@ export interface Seaport extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<string>;
 
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     prepare(
-      orders: OrderStruct[],
+      orders: AdvancedOrderStruct[],
       premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
       recipients: PromiseOrValue<string>[],
       numWords: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<string[]>;
+    ): Promise<BigNumber>;
+
+    removeMember(
+      addr: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -787,6 +913,15 @@ export interface Seaport extends BaseContract {
       newCounter?: null,
       offerer?: PromiseOrValue<string> | null
     ): CounterIncrementedEventFilter;
+
+    "MatchSuccessOrNot(uint256,bool)"(
+      requestId?: null,
+      isSuccess?: null
+    ): MatchSuccessOrNotEventFilter;
+    MatchSuccessOrNot(
+      requestId?: null,
+      isSuccess?: null
+    ): MatchSuccessOrNotEventFilter;
 
     "OrderCancelled(bytes32,address,address)"(
       orderHash?: null,
@@ -839,6 +974,11 @@ export interface Seaport extends BaseContract {
   };
 
   estimateGas: {
+    addMember(
+      addr: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     cancel(
       orders: OrderComponentsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -871,7 +1011,7 @@ export interface Seaport extends BaseContract {
     information(overrides?: CallOverrides): Promise<BigNumber>;
 
     matchOrdersWithRandom(
-      arg0: OrderStruct[],
+      arg0: AdvancedOrderStruct[],
       arg1: FulfillmentStruct[],
       requestId: PromiseOrValue<BigNumberish>,
       orderProbility: OrderProbilityStruct[],
@@ -880,14 +1020,28 @@ export interface Seaport extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     prepare(
-      orders: OrderStruct[],
+      orders: AdvancedOrderStruct[],
       premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
       recipients: PromiseOrValue<string>[],
       numWords: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    removeMember(
+      addr: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     renounceOwnership(
@@ -913,6 +1067,11 @@ export interface Seaport extends BaseContract {
   };
 
   populateTransaction: {
+    addMember(
+      addr: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     cancel(
       orders: OrderComponentsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -945,7 +1104,7 @@ export interface Seaport extends BaseContract {
     information(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     matchOrdersWithRandom(
-      arg0: OrderStruct[],
+      arg0: AdvancedOrderStruct[],
       arg1: FulfillmentStruct[],
       requestId: PromiseOrValue<BigNumberish>,
       orderProbility: OrderProbilityStruct[],
@@ -954,14 +1113,28 @@ export interface Seaport extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     prepare(
-      orders: OrderStruct[],
+      orders: AdvancedOrderStruct[],
       premiumOrdersIndex: PromiseOrValue<BigNumberish>[],
       recipients: PromiseOrValue<string>[],
       numWords: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    removeMember(
+      addr: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     renounceOwnership(

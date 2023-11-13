@@ -9,6 +9,8 @@ import type * as interfaces from "./interfaces";
 export type { interfaces };
 import type * as test from "./test";
 export type { test };
+import type * as vrf from "./vrf";
+export type { vrf };
 import type * as zones from "./zones";
 export type { zones };
 export type { Seaport } from "./Seaport";

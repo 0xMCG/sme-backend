@@ -463,7 +463,7 @@ const _abi = [
     name: "OrdersMatched",
     type: "event",
   },
-] as const;
+];
 
 export class ConsiderationEventsAndErrors__factory {
   static readonly abi = _abi;

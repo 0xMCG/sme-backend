@@ -5,5 +5,6 @@ export * as conduit from "./conduit";
 export * as helpers from "./helpers";
 export * as interfaces from "./interfaces";
 export * as test from "./test";
+export * as vrf from "./vrf";
 export * as zones from "./zones";
 export { Seaport__factory } from "./Seaport__factory";

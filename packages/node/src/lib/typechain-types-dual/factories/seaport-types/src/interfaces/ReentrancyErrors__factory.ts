@@ -15,7 +15,7 @@ const _abi = [
     name: "NoReentrantCalls",
     type: "error",
   },
-] as const;
+];
 
 export class ReentrancyErrors__factory {
   static readonly abi = _abi;
