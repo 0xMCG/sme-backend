@@ -50,7 +50,11 @@ export class OrderService {
       if (_.isEmpty(validOrders)) {
         return result;
       }
-      const allOrderPrices: OrderPrice[] = this.parseOrderPrice(_.map(validOrders, i => i.entry), maxPrice, minPrice);
+      const allOrderPrices: OrderPrice[] = this.parseOrderPrice(_.map(validOrders, i => {
+        const result = i.entry;
+        result.parameters.orderType = new BigNumber(result.type).toNumber();
+        return result;
+      }), maxPrice, minPrice);
       result = this.calculateOrderDistribution(allOrderPrices, maxPrice, minPrice, precision);
     } else {
       console.log("no transactions...")
@@ -90,7 +94,7 @@ export class OrderService {
           const beta = 3;
           const dist1 = formulajs.BETADIST(i, alpha, beta, true,  j.min, j.max);
           const dist2 = formulajs.BETADIST(new BigNumber(i).plus(precision).toNumber(), alpha, beta, true,  j.min, j.max);
-          expectation = new BigNumber(expectation).plus(dist2).minus(dist1).multipliedBy(j.quantity);
+          expectation = new BigNumber(dist2).minus(dist1).multipliedBy(j.quantity).plus(expectation);
         }
       })
       return {
